@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
@@ -146,14 +146,14 @@ const sortOptions = [
   { value: "cheapest", labelAr: "الأقل سعراً", labelEn: "Lowest Price" },
   { value: "expensive", labelAr: "الأكثر سعراً", labelEn: "Highest Price" },
   {
-    value: "early_departure",
-    labelAr: "رحلة الذهاب: (مبكر)",
-    labelEn: "Departure (Early)",
+    value: "shortest_duration",
+    labelAr: "أقصر مدة رحلة",
+    labelEn: "Shortest Duration",
   },
   {
-    value: "late_departure",
-    labelAr: "رحلة الذهاب: (متأخر)",
-    labelEn: "Departure (Late)",
+    value: "longest_duration",
+    labelAr: "أطول مدة رحلة",
+    labelEn: "Longest Duration",
   },
 ];
 
@@ -185,6 +185,75 @@ const FlightResults = () => {
   const minGap = 50;
   const maxLimit = 5000;
 
+  const parseDurationToMinutes = (durationFormatted) => {
+    if (!durationFormatted) return 0;
+
+    const hoursMatch = durationFormatted.match(/(\d+)h/);
+    const minutesMatch = durationFormatted.match(/(\d+)m/);
+
+    const hours = hoursMatch ? parseInt(hoursMatch[1]) : 0;
+    const minutes = minutesMatch ? parseInt(minutesMatch[1]) : 0;
+
+    return hours * 60 + minutes;
+  };
+
+  const getLowestPrice = (flight) => {
+    if (!flight.classes || flight.classes.length === 0) return Infinity;
+    return Math.min(...flight.classes.map((cls) => cls.price));
+  };
+
+  const sortResults = (resultsToSort, sortType) => {
+    if (!resultsToSort || sortType === "all") return resultsToSort;
+
+    const sortedResults = [...resultsToSort];
+
+    switch (sortType) {
+      case "cheapest":
+        return sortedResults.sort(
+          (a, b) => getLowestPrice(a) - getLowestPrice(b)
+        );
+
+      case "expensive":
+        return sortedResults.sort(
+          (a, b) => getLowestPrice(b) - getLowestPrice(a)
+        );
+
+      case "shortest_duration":
+        return sortedResults.sort((a, b) => {
+          const durationA = parseDurationToMinutes(a.durationFormatted);
+          const durationB = parseDurationToMinutes(b.durationFormatted);
+          return durationA - durationB;
+        });
+
+      case "longest_duration":
+        return sortedResults.sort((a, b) => {
+          const durationA = parseDurationToMinutes(a.durationFormatted);
+          const durationB = parseDurationToMinutes(b.durationFormatted);
+          return durationB - durationA;
+        });
+
+      case "early_departure":
+        return sortedResults.sort(
+          (a, b) => new Date(a.departureDate) - new Date(b.departureDate)
+        );
+
+      case "late_departure":
+        return sortedResults.sort(
+          (a, b) => new Date(b.departureDate) - new Date(a.departureDate)
+        );
+
+      default:
+        return sortedResults;
+    }
+  };
+
+  useEffect(() => {
+    if (results) {
+      const sortedResults = sortResults(results, sortBy);
+      setFilteredResults(sortedResults);
+    }
+  }, [sortBy, results]);
+
   const handleMinPriceChange = (e) => {
     const value = Math.min(Number(e.target.value), maxPrice - minGap);
     setMinPrice(value);
@@ -195,17 +264,17 @@ const FlightResults = () => {
   };
   const handleFilter = () => {
     if (!results) return;
-    setFilteredResults(
-      results.filter((f) => {
-        // Some flights have multiple classes, check if any class is in range
-        if (Array.isArray(f.classes) && f.classes.length > 0) {
-          return f.classes.some(
-            (cls) => cls.price >= minPrice && cls.price <= maxPrice
-          );
-        }
-        return false;
-      })
-    );
+    const filtered = results.filter((f) => {
+      if (Array.isArray(f.classes) && f.classes.length > 0) {
+        return f.classes.some(
+          (cls) => cls.price >= minPrice && cls.price <= maxPrice
+        );
+      }
+      return false;
+    });
+
+    const sortedFiltered = sortResults(filtered, sortBy);
+    setFilteredResults(sortedFiltered);
   };
 
   const handleBookNow = async (flightId, classId) => {
@@ -522,6 +591,15 @@ const FlightResults = () => {
                       {new Date(flight.arrivalDate).toLocaleDateString()}{" "}
                       {new Date(flight.arrivalDate).toLocaleTimeString()}
                     </div>
+                    {flight.durationFormatted && (
+                      <div>
+                        <i className="fas fa-clock"></i>{" "}
+                        <strong>
+                          {language === "ar" ? "مدة الرحلة:" : "Duration:"}
+                        </strong>{" "}
+                        {flight.durationFormatted}
+                      </div>
+                    )}
                   </div>
                   {flight.classes && flight.classes.length > 0 && (
                     <div
