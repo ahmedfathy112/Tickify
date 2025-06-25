@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
 
@@ -420,9 +420,150 @@ const Profile = () => {
   const [avatar, setAvatar] = useState(localStorage.getItem("avatar") || "");
   const [pendingAvatar, setPendingAvatar] = useState(null);
 
-  const firstName = localStorage.getItem("email") || "";
-  const lastName = localStorage.getItem("firstName") || "";
-  const emailLS = localStorage.getItem("lastName") || "";
+  // User data state
+  const [userData, setUserData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // Reservations state
+  const [reservations, setReservations] = useState([]);
+  const [reservationsLoading, setReservationsLoading] = useState(true);
+  const [reservationsError, setReservationsError] = useState(null);
+
+  // Fetch user data from API
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setError("No authentication token found");
+          setLoading(false);
+          return;
+        }
+
+        const response = await fetch(
+          "https://tickifywebsite.runasp.net/me/info",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            setError("Authentication failed. Please login again.");
+            // Optionally redirect to login or clear localStorage
+            localStorage.removeItem("token");
+            localStorage.removeItem("isLoggedIn");
+          } else {
+            setError(`Failed to fetch user data: ${response.status}`);
+          }
+          setLoading(false);
+          return;
+        }
+
+        const data = await response.json();
+        setUserData(data);
+
+        // Update localStorage with fetched data
+        localStorage.setItem("firstName", data.firstName || "");
+        localStorage.setItem("lastName", data.lastName || "");
+        localStorage.setItem("email", data.email || "");
+      } catch (err) {
+        console.error("Error fetching user data:", err);
+        setError("Failed to fetch user data. Please try again.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
+  // Fetch reservations from API
+  useEffect(() => {
+    const fetchReservations = async () => {
+      try {
+        setReservationsLoading(true);
+        setReservationsError(null);
+
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setReservationsError("No authentication token found");
+          setReservationsLoading(false);
+          return;
+        }
+
+        const response = await fetch(
+          "https://tickifywebsite.runasp.net/me/my-reservations",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            setReservationsError("Authentication failed. Please login again.");
+          } else {
+            setReservationsError(
+              `Failed to fetch reservations: ${response.status}`
+            );
+          }
+          setReservationsLoading(false);
+          return;
+        }
+
+        const data = await response.json();
+        setReservations(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error("Error fetching reservations:", err);
+        setReservationsError("Failed to fetch reservations. Please try again.");
+      } finally {
+        setReservationsLoading(false);
+      }
+    };
+
+    fetchReservations();
+  }, []);
+
+  // Helper function to format date
+  const formatDate = (dateString) => {
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleDateString("ar-EG", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch (error) {
+      return dateString;
+    }
+  };
+
+  // Helper function to get airport name without the number
+  const getAirportName = (airportString) => {
+    if (!airportString) return "";
+    // Remove the number at the end (e.g., "Adnan Menderes Airport 11" -> "Adnan Menderes Airport")
+    return airportString.replace(/\s+\d+$/, "");
+  };
+
+  // Use API data if available, fallback to localStorage
+  const firstName =
+    userData?.firstName || localStorage.getItem("firstName") || "";
+  const lastName = userData?.lastName || localStorage.getItem("lastName") || "";
+  const emailLS = userData?.email || localStorage.getItem("email") || "";
   const phoneLS = localStorage.getItem("phone") || "";
   const fullName =
     firstName && lastName
@@ -613,7 +754,44 @@ const Profile = () => {
             )}
           </ProfileAvatar>
           <ProfileInfo>
-            {editMode ? (
+            {loading ? (
+              <div
+                style={{ display: "flex", alignItems: "center", gap: "10px" }}
+              >
+                <i
+                  className="fas fa-spinner fa-spin"
+                  style={{ color: "#1976d2" }}
+                ></i>
+                <span style={{ color: "#666" }}>جاري تحميل البيانات...</span>
+              </div>
+            ) : error ? (
+              <div
+                style={{
+                  color: "#c62828",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "10px",
+                }}
+              >
+                <i className="fas fa-exclamation-triangle"></i>
+                <span>{error}</span>
+                <button
+                  onClick={() => window.location.reload()}
+                  style={{
+                    background: "#1976d2",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "4px 8px",
+                    fontSize: "12px",
+                    cursor: "pointer",
+                    marginLeft: "10px",
+                  }}
+                >
+                  إعادة المحاولة
+                </button>
+              </div>
+            ) : editMode ? (
               <>
                 <input
                   type="text"
@@ -731,22 +909,48 @@ const Profile = () => {
                     </ProfilePhone>
                   )}
                 </div>
+                {userData && (
+                  <div
+                    style={{
+                      fontSize: "12px",
+                      color: "#666",
+                      marginTop: "4px",
+                      padding: "4px 8px",
+                      background: "#e8f5e9",
+                      borderRadius: "4px",
+                      border: "1px solid #c8e6c9",
+                    }}
+                  >
+                    <i className="fas fa-check-circle"></i> البيانات محدثة من
+                    الخادم
+                  </div>
+                )}
               </div>
             )}
           </ProfileInfo>
-          <EditProfileBtn onClick={() => setEditMode(true)}>
-            <i className="fas fa-edit"></i>
-            تعديل الملف الشخصي
-          </EditProfileBtn>
+          {!loading && !error && (
+            <EditProfileBtn onClick={() => setEditMode(true)}>
+              <i className="fas fa-edit"></i>
+              تعديل الملف الشخصي
+            </EditProfileBtn>
+          )}
         </ProfileHeader>
 
         <ProfileStats>
           <StatItem>
-            <StatNumber>2</StatNumber>
+            <StatNumber>{reservations.length}</StatNumber>
+            <StatLabel>إجمالي الحجوزات</StatLabel>
+          </StatItem>
+          <StatItem>
+            <StatNumber>
+              {reservations.filter((r) => r.status === "active").length}
+            </StatNumber>
             <StatLabel>حجوزات نشطة</StatLabel>
           </StatItem>
           <StatItem>
-            <StatNumber>3</StatNumber>
+            <StatNumber>
+              {reservations.filter((r) => r.status === "completed").length}
+            </StatNumber>
             <StatLabel>حجوزات مكتملة</StatLabel>
           </StatItem>
         </ProfileStats>
@@ -754,46 +958,101 @@ const Profile = () => {
         <ProfileSections>
           <ProfileSection>
             <SectionTitle>
-              <i className="fas fa-plane"></i> الحجوزات النشطة
+              <i className="fas fa-plane"></i> الحجوزات
             </SectionTitle>
-            <ReservationItem>
-              <ReservationFlight>القاهرة - جدة</ReservationFlight>
-              <ReservationDates>
-                <i className="fas fa-calendar"></i> من: 2024-03-20 إلى:
-                2024-03-25
-              </ReservationDates>
-              <ReservationStatus status="active">نشط</ReservationStatus>
-            </ReservationItem>
-            <ReservationItem>
-              <ReservationFlight>القاهرة - دبي</ReservationFlight>
-              <ReservationDates>
-                <i className="fas fa-calendar"></i> من: 2024-04-01 إلى:
-                2024-04-05
-              </ReservationDates>
-              <ReservationStatus status="active">نشط</ReservationStatus>
-            </ReservationItem>
-          </ProfileSection>
-
-          <ProfileSection>
-            <SectionTitle>
-              <i className="fas fa-history"></i> الحجوزات المكتملة
-            </SectionTitle>
-            <ReservationItem>
-              <ReservationFlight>القاهرة - اسطنبول</ReservationFlight>
-              <ReservationDates>
-                <i className="fas fa-calendar"></i> من: 2024-02-15 إلى:
-                2024-02-20
-              </ReservationDates>
-              <ReservationStatus status="completed">مكتمل</ReservationStatus>
-            </ReservationItem>
-            <ReservationItem>
-              <ReservationFlight>القاهرة - باريس</ReservationFlight>
-              <ReservationDates>
-                <i className="fas fa-calendar"></i> من: 2024-01-10 إلى:
-                2024-01-15
-              </ReservationDates>
-              <ReservationStatus status="cancelled">ملغي</ReservationStatus>
-            </ReservationItem>
+            {reservationsLoading ? (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 20,
+                }}
+              >
+                <i
+                  className="fas fa-spinner fa-spin"
+                  style={{ color: "#1976d2", fontSize: 24 }}
+                ></i>
+                <span style={{ marginLeft: 10, color: "#666" }}>
+                  جاري تحميل الحجوزات...
+                </span>
+              </div>
+            ) : reservationsError ? (
+              <div
+                style={{
+                  color: "#c62828",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  padding: 20,
+                  flexDirection: "column",
+                  gap: 10,
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <i className="fas fa-exclamation-triangle"></i>
+                  <span>{reservationsError}</span>
+                </div>
+                <button
+                  onClick={() => window.location.reload()}
+                  style={{
+                    background: "#1976d2",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "4px",
+                    padding: "8px 16px",
+                    fontSize: "14px",
+                    cursor: "pointer",
+                  }}
+                >
+                  إعادة المحاولة
+                </button>
+              </div>
+            ) : reservations.length === 0 ? (
+              <div
+                style={{
+                  textAlign: "center",
+                  padding: 40,
+                  color: "#666",
+                }}
+              >
+                <i
+                  className="fas fa-plane"
+                  style={{ fontSize: 48, marginBottom: 16, opacity: 0.5 }}
+                ></i>
+                <div>لا توجد حجوزات حالياً</div>
+              </div>
+            ) : (
+              <>
+                {reservations.map((reservation, index) => (
+                  <ReservationItem key={index}>
+                    <ReservationFlight>
+                      {getAirportName(reservation.departureAirport)} -{" "}
+                      {getAirportName(reservation.arrivalAirport)}
+                    </ReservationFlight>
+                    <ReservationDates>
+                      <div style={{ marginBottom: 4 }}>
+                        <i
+                          className="fas fa-plane-departure"
+                          style={{ color: "#1976d2", marginRight: 8 }}
+                        ></i>
+                        <strong>مغادرة:</strong>{" "}
+                        {formatDate(reservation.departureDate)}
+                      </div>
+                      <div>
+                        <i
+                          className="fas fa-plane-arrival"
+                          style={{ color: "#4caf50", marginRight: 8 }}
+                        ></i>
+                        <strong>وصول:</strong>{" "}
+                        {formatDate(reservation.arrivalDate)}
+                      </div>
+                    </ReservationDates>
+                    <ReservationStatus status="active">نشط</ReservationStatus>
+                  </ReservationItem>
+                ))}
+              </>
+            )}
           </ProfileSection>
 
           <ProfileSection>
