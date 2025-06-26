@@ -130,7 +130,7 @@ const CustomIconBtn = styled.button`
 
 const Sidebar = styled.div`
   position: fixed;
-  top: 66px;
+  top: 59px;
   left: ${(props) => (props.isOpen ? "0" : "-300px")};
   width: 280px;
   height: 100vh;
@@ -325,21 +325,9 @@ const Navbar = () => {
 
         <SidebarMenu>
           <SidebarItem>
-            <Link to="/flights">
+            <Link to="/">
               <i className="fas fa-plane"></i>
               <span>رحلات طيران</span>
-            </Link>
-          </SidebarItem>
-          <SidebarItem>
-            <Link to="/hotels">
-              <i className="fas fa-hotel"></i>
-              <span>الفنادق</span>
-            </Link>
-          </SidebarItem>
-          <SidebarItem>
-            <Link to="/cars">
-              <i className="fas fa-car"></i>
-              <span>السيارات</span>
             </Link>
           </SidebarItem>
 

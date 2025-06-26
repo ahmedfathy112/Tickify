@@ -7,7 +7,7 @@ import '@fortawesome/fontawesome-free/css/all.min.css';
 const FixedIconsContainer = styled.div`
   position: fixed;
   left: ${props => props.isSidebarOpen ? '300px' : '1rem'};
-  top: 40%;
+  top: 30%;
   transform: translateY(-50%);
   display: flex;
   flex-direction: column;
@@ -17,6 +17,10 @@ const FixedIconsContainer = styled.div`
   opacity: ${props => props.isSidebarOpen ? 0 : 1};
   visibility: ${props => props.isSidebarOpen ? 'hidden' : 'visible'};
   pointer-events: ${props => props.isSidebarOpen ? 'none' : 'auto'};
+
+  @media (max-width: 768px) {
+    display: none;
+  }
 `;
 
 const IconLink = styled(Link)`
@@ -89,8 +93,6 @@ const FixedIcons = () => {
 
   const icons = [
     { to: '/', icon: 'plane', text: 'رحلات طيران' },
-    { to: '/hotels', icon: 'hotel', text: 'الفنادق' },
-    { to: '/cars', icon: 'car', text: 'السيارات' },
     isLoggedIn
       ? { to: '/logout', icon: 'sign-out-alt', text: 'تسجيل الخروج', logout: true }
       : { to: '/login', icon: 'sign-in-alt', text: 'تسجيل الدخول' },

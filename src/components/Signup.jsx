@@ -1,21 +1,17 @@
 import React, { useState } from "react";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { useLanguage } from "../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { useSidebar } from "../context/SidebarContext";
+import googleLogo from '../images/google.png';
+import facebookLogo from '../images/facebook.png';
+import xLogo from '../images/X.png';
 
-const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-  width: 100%;
-  padding: 20px;
-
-  @media (max-width: 768px) {
-    padding: 10px;
+const SignupGlobalStyle = createGlobalStyle`
+  body {
+    padding: 0 !important;
+    
   }
 `;
 
@@ -26,9 +22,7 @@ const LoginCard = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 450px;
-  margin-top: -12rem;
-  margin-right: 7rem;
-
+  margin:0px;
   @media (max-width: 768px) {
     padding: 30px;
     margin: 0;
@@ -40,7 +34,7 @@ const LoginTitle = styled.h1`
   color: #00233d;
   font-size: 32px;
   margin-bottom: 8px;
-  text-align: end;
+  text-align: start;
   font-weight: bold;
   margin-top: -25px;
   margin-left: -15px;
@@ -57,7 +51,7 @@ const LoginSubtitle = styled.h2`
   font-size: 16px;
   font-weight: normal;
   margin-bottom: 30px;
-  text-align: end;
+  text-align: start;
   margin-left: -15px;
 
   @media (max-width: 768px) {
@@ -74,7 +68,7 @@ const FormGroup = styled.div`
     color: #00233d;
     margin-bottom: 8px;
     font-size: 14px;
-    text-align: end;
+    text-align: start;
     margin-left: -1rem;
 
     @media (max-width: 768px) {
@@ -90,7 +84,7 @@ const FormGroup = styled.div`
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.3s;
-    margin-right: 20px;
+   
 
     @media (max-width: 768px) {
       padding-right: 12px;
@@ -137,7 +131,7 @@ const RememberMe = styled.div`
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-right: 6rem;
+ 
 
   @media (max-width: 768px) {
     margin-right: 2rem;
@@ -444,7 +438,8 @@ const Signup = () => {
   };
 
   return (
-    <Container>
+    <>
+      <SignupGlobalStyle />
       <LoginCard>
         <LoginTitle>{language === "ar" ? "إنشاء حساب" : "Sign Up"}</LoginTitle>
         <LoginSubtitle>
@@ -609,29 +604,11 @@ const Signup = () => {
           </FormGroup>
           <FormOptions>
             <RememberMe>
-              <input
-                type="checkbox"
-                id="terms"
-                checked={termsAccepted}
-                onChange={(e) => setTermsAccepted(e.target.checked)}
-                style={
-                  termsError
-                    ? { outline: "2px solid red", boxShadow: "0 0 0 2px red" }
-                    : {}
-                }
-              />
-              <label htmlFor="terms">
-                {language === "ar" ? "أوافق على" : "I agree to the"}
-                <span
-                  style={{
-                    margin: language === "ar" ? "0 8px 0 0" : "0 0 0 8px",
-                  }}
-                ></span>
-                <a href="/terms" target="_blank" rel="noopener noreferrer">
-                  {language === "ar"
-                    ? "الشروط والأحكام"
-                    : "Terms and Conditions"}
-                </a>
+               <input type="checkbox" id="terms" checked={termsAccepted} onChange={e => setTermsAccepted(e.target.checked)} style={termsError ? { outline: '2px solid red', boxShadow: '0 0 0 2px red' } : {}} />
+              <label htmlFor="terms" style={{ cursor: 'pointer' }}>
+                {language === 'ar'
+                  ? 'أوافق على الشروط والأحكام'
+                  : 'I agree to the Terms and Conditions'}
               </label>
             </RememberMe>
           </FormOptions>
@@ -667,13 +644,13 @@ const Signup = () => {
           </Divider>
           <SocialButtonsContainer>
             <SocialButton className="google">
-              <i className="fab fa-google"></i>
+              <img src={googleLogo} alt="Google" />
             </SocialButton>
             <SocialButton className="facebook">
-              <i className="fab fa-facebook-f" style={{ color: "#1877F3" }}></i>
+              <img src={facebookLogo} alt="Facebook" />
             </SocialButton>
             <SocialButton className="twitter">
-              <i className="fab fa-x-twitter"></i>
+              <img src={xLogo} alt="X" />
             </SocialButton>
           </SocialButtonsContainer>
         </SocialLoginSection>
@@ -682,7 +659,7 @@ const Signup = () => {
           <a href="/login">{language === "ar" ? "تسجيل الدخول" : "Login"}</a>
         </SignupLink>
       </LoginCard>
-    </Container>
+    </>
   );
 };
 

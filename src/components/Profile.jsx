@@ -1,15 +1,40 @@
 import React, { useState, useEffect } from "react";
 import styled from "styled-components";
 import { Link } from "react-router-dom";
+import googleLogo from "../images/google.png";
+import facebookLogo from "../images/facebook.png";
+import xLogo from "../images/X.png";
+import { createGlobalStyle } from "styled-components";
+import UserInfoSection from "./UserInfoSection";
+import SettingsSection from "./SettingsSection";
+import TripsSection from "./TripsSection";
+import "./ProfileDashboard.css";
+
+const ProfileGlobalStyle = createGlobalStyle`
+  @media (max-width: 900px) {
+    body {
+      padding: 0 !important;
+    }
+  }
+`;
 
 const ProfileContainer = styled.div`
   max-width: 1200px;
   width: 100%;
-  margin: 40px auto 0 auto;
-  padding: 20px;
+  margin: 0 auto 0 auto;
+  padding-right: 20px;
+  padding-bottom: 20px;
+  padding-left: 20px;
   box-sizing: border-box;
   background: #f5f6fa;
   min-height: 100vh;
+  @media (max-width: 900px) {
+    padding: 8px 2px;
+    background: #fff;
+  }
+  @media (max-width: 600px) {
+    padding: 2px 0;
+  }
 `;
 
 const ProfileHeader = styled.div`
@@ -22,6 +47,26 @@ const ProfileHeader = styled.div`
   align-items: center;
   gap: 30px;
   width: 100%;
+  @media (max-width: 900px) {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 8px 0 8px 0;
+    gap: 8px;
+    width: 100vw;
+    border-radius: 0 0 10px 10px;
+    margin-left: 0;
+    margin-right: 0;
+    margin-bottom: 10px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+  }
+  @media (max-width: 600px) {
+    padding: 4px 0 4px 0;
+    gap: 4px;
+    margin-bottom: 6px;
+    margin-right: 10px;
+    width: 95vw;
+    margin-top: 80px;
+  }
 `;
 
 const ProfileAvatar = styled.div`
@@ -34,6 +79,16 @@ const ProfileAvatar = styled.div`
   justify-content: center;
   font-size: 60px;
   color: #666;
+  @media (max-width: 900px) {
+    width: 90px;
+    height: 90px;
+    font-size: 36px;
+  }
+  @media (max-width: 600px) {
+    width: 60px;
+    height: 60px;
+    font-size: 24px;
+  }
 `;
 
 const ProfileInfo = styled.div`
@@ -45,6 +100,14 @@ const ProfileName = styled.h1`
   font-weight: bold;
   margin-bottom: 10px;
   color: #333;
+  @media (max-width: 900px) {
+    font-size: 18px;
+    margin-bottom: 4px;
+  }
+  @media (max-width: 600px) {
+    font-size: 15px;
+    margin-bottom: 2px;
+  }
 `;
 
 const ProfileEmail = styled.div`
@@ -79,6 +142,15 @@ const ProfileStats = styled.div`
   gap: 15px;
   margin-bottom: 20px;
   width: 100%;
+  @media (max-width: 900px) {
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  @media (max-width: 600px) {
+    gap: 2px;
+    margin-bottom: 4px;
+    grid-template-columns: repeat(3, 1fr);
+  }
 `;
 
 const StatItem = styled.div`
@@ -105,6 +177,10 @@ const ProfileSections = styled.div`
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
   width: 100%;
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 `;
 
 const ProfileSection = styled.div`
@@ -112,6 +188,12 @@ const ProfileSection = styled.div`
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  @media (max-width: 900px) {
+    padding: 8px;
+  }
+  @media (max-width: 600px) {
+    padding: 4px;
+  }
 `;
 
 const SectionTitle = styled.h2`
@@ -124,6 +206,14 @@ const SectionTitle = styled.h2`
   gap: 10px;
   & i {
     color: #1976d2;
+  }
+  @media (max-width: 900px) {
+    font-size: 15px;
+    margin-bottom: 8px;
+  }
+  @media (max-width: 600px) {
+    font-size: 13px;
+    margin-bottom: 4px;
   }
 `;
 
@@ -179,6 +269,12 @@ const ProfileMainContent = styled.div`
   position: relative;
   left: 50%;
   transform: translateX(-50%);
+  @media (max-width: 900px) {
+    left: 0;
+    transform: none;
+    width: 100vw;
+    max-width: 100vw;
+  }
 `;
 
 const PasswordForm = styled.form`
@@ -360,6 +456,11 @@ const LinkedAccountCol = styled.div`
   flex-direction: row;
   align-items: center;
   min-width: 140px;
+  @media (max-width: 600px) {
+    width: 150px;
+    min-width: 90px;
+    padding: 10px 8px 8px 8px;
+  }
 `;
 const LinkedAccountName = styled.span`
   font-size: 1.08em;
@@ -389,6 +490,13 @@ const LinkedAccountUnlink = styled.button`
   cursor: pointer;
   text-decoration: underline;
   padding: 0 8px;
+`;
+
+const ReservationsScrollBox = styled.div`
+  max-height: 220px;
+  overflow-y: auto;
+  padding-left: 2px;
+  margin-bottom: 0.5rem;
 `;
 
 const Profile = () => {
@@ -429,6 +537,15 @@ const Profile = () => {
   const [reservations, setReservations] = useState([]);
   const [reservationsLoading, setReservationsLoading] = useState(true);
   const [reservationsError, setReservationsError] = useState(null);
+
+  // Fetch hotel reservations from API
+  const [hotelReservations, setHotelReservations] = useState([]);
+  const [hotelReservationsLoading, setHotelReservationsLoading] =
+    useState(true);
+  const [hotelReservationsError, setHotelReservationsError] = useState(null);
+
+  // Dashboard layout state
+  const [activeSection, setActiveSection] = useState("user");
 
   // Fetch user data from API
   useEffect(() => {
@@ -492,14 +609,12 @@ const Profile = () => {
       try {
         setReservationsLoading(true);
         setReservationsError(null);
-
         const token = localStorage.getItem("token");
         if (!token) {
           setReservationsError("No authentication token found");
           setReservationsLoading(false);
           return;
         }
-
         const response = await fetch(
           "https://tickifywebsite.runasp.net/me/my-reservations",
           {
@@ -510,7 +625,6 @@ const Profile = () => {
             },
           }
         );
-
         if (!response.ok) {
           if (response.status === 401) {
             setReservationsError("Authentication failed. Please login again.");
@@ -522,18 +636,63 @@ const Profile = () => {
           setReservationsLoading(false);
           return;
         }
-
         const data = await response.json();
         setReservations(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("Error fetching reservations:", err);
         setReservationsError("Failed to fetch reservations. Please try again.");
       } finally {
         setReservationsLoading(false);
       }
     };
-
     fetchReservations();
+  }, []);
+
+  // Fetch hotel reservations from API
+  useEffect(() => {
+    const fetchHotelReservations = async () => {
+      try {
+        setHotelReservationsLoading(true);
+        setHotelReservationsError(null);
+        const token = localStorage.getItem("token");
+        if (!token) {
+          setHotelReservationsError("No authentication token found");
+          setHotelReservationsLoading(false);
+          return;
+        }
+        const response = await fetch(
+          "https://tickifywebsite.runasp.net/me/my-Hotel-reservations",
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        if (!response.ok) {
+          if (response.status === 401) {
+            setHotelReservationsError(
+              "Authentication failed. Please login again."
+            );
+          } else {
+            setHotelReservationsError(
+              `Failed to fetch hotel reservations: ${response.status}`
+            );
+          }
+          setHotelReservationsLoading(false);
+          return;
+        }
+        const data = await response.json();
+        setHotelReservations(Array.isArray(data) ? data : []);
+      } catch (err) {
+        setHotelReservationsError(
+          "Failed to fetch hotel reservations. Please try again."
+        );
+      } finally {
+        setHotelReservationsLoading(false);
+      }
+    };
+    fetchHotelReservations();
   }, []);
 
   // Helper function to format date
@@ -650,795 +809,50 @@ const Profile = () => {
     }
   };
 
+  // Dashboard layout with tabbed navigation
+  const tabList = [
+    { key: "user", label: "Account" },
+    { key: "settings", label: "Settings" },
+    { key: "trips", label: "Trips" },
+  ];
+
   return (
-    <ProfileMainContent>
-      <ProfileContainer>
-        <ProfileHeader>
-          <ProfileAvatar style={{ position: "relative", overflow: "hidden" }}>
-            {pendingAvatar ? (
-              <img
-                src={pendingAvatar}
-                alt="pending-avatar"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  borderRadius: "50%",
-                  opacity: 0.8,
-                  border: "2px dashed #1976d2",
-                }}
-              />
-            ) : avatar ? (
-              <img
-                src={avatar}
-                alt="avatar"
-                style={{
-                  width: "100%",
-                  height: "100%",
-                  objectFit: "cover",
-                  borderRadius: "50%",
-                }}
-              />
-            ) : (
-              <i className="fas fa-user"></i>
-            )}
-            {editMode && (
-              <>
-                <label
-                  htmlFor="avatar-upload"
-                  style={{
-                    position: "absolute",
-                    bottom: 8,
-                    left: "50%",
-                    transform: "translateX(-50%)",
-                    background: "#fff",
-                    borderRadius: "50%",
-                    boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                    padding: 6,
-                    cursor: "pointer",
-                    border: "1px solid #ccc",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    width: 36,
-                    height: 36,
-                    zIndex: 2,
-                  }}
-                  title="تغيير الصورة"
-                >
-                  <i
-                    className="fas fa-camera"
-                    style={{ color: "#1976d2", fontSize: 18 }}
-                  ></i>
-                  <input
-                    id="avatar-upload"
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    style={{ display: "none" }}
-                  />
-                </label>
-                {(avatar || pendingAvatar) && (
-                  <button
-                    onClick={() => {
-                      setPendingAvatar(null);
-                      setAvatar("");
-                      localStorage.removeItem("avatar");
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: 8,
-                      left: "50%",
-                      transform: "translateX(-50%)",
-                      background: "#fff",
-                      borderRadius: "50%",
-                      boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                      border: "1px solid #ccc",
-                      width: 32,
-                      height: 32,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      cursor: "pointer",
-                      zIndex: 2,
-                    }}
-                    title="حذف الصورة"
-                  >
-                    <i
-                      className="fas fa-trash"
-                      style={{ color: "#c62828", fontSize: 16 }}
-                    ></i>
-                  </button>
-                )}
-              </>
-            )}
-          </ProfileAvatar>
-          <ProfileInfo>
-            {loading ? (
-              <div
-                style={{ display: "flex", alignItems: "center", gap: "10px" }}
-              >
-                <i
-                  className="fas fa-spinner fa-spin"
-                  style={{ color: "#1976d2" }}
-                ></i>
-                <span style={{ color: "#666" }}>جاري تحميل البيانات...</span>
-              </div>
-            ) : error ? (
-              <div
-                style={{
-                  color: "#c62828",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "10px",
-                }}
-              >
-                <i className="fas fa-exclamation-triangle"></i>
-                <span>{error}</span>
-                <button
-                  onClick={() => window.location.reload()}
-                  style={{
-                    background: "#1976d2",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "4px",
-                    padding: "4px 8px",
-                    fontSize: "12px",
-                    cursor: "pointer",
-                    marginLeft: "10px",
-                  }}
-                >
-                  إعادة المحاولة
-                </button>
-              </div>
-            ) : editMode ? (
-              <>
-                <input
-                  type="text"
-                  value={editName}
-                  onChange={(e) => setEditName(e.target.value)}
-                  style={{
-                    fontSize: 20,
-                    marginBottom: 8,
-                    padding: 8,
-                    borderRadius: 6,
-                    border: "1px solid #ccc",
-                    width: "100%",
-                  }}
-                  placeholder="الاسم الكامل"
-                />
-                <div style={{ display: "flex", gap: 10 }}>
-                  <input
-                    type="email"
-                    value={editEmail}
-                    onChange={(e) => setEditEmail(e.target.value)}
-                    style={{
-                      fontSize: 16,
-                      marginBottom: 8,
-                      padding: 8,
-                      borderRadius: 6,
-                      border: "1px solid #ccc",
-                      flex: 1,
-                    }}
-                    placeholder="البريد الإلكتروني"
-                  />
-                  <input
-                    type="tel"
-                    value={editPhone}
-                    onChange={(e) => setEditPhone(e.target.value)}
-                    style={{
-                      fontSize: 16,
-                      marginBottom: 8,
-                      padding: 8,
-                      borderRadius: 6,
-                      border: "1px solid #ccc",
-                      flex: 1,
-                    }}
-                    placeholder="رقم الهاتف"
-                  />
-                </div>
-                <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
-                  <button
-                    style={{
-                      background: "#00233d",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: 5,
-                      padding: "6px 16px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      localStorage.setItem("fullName", editName);
-                      localStorage.setItem("email", editEmail);
-                      localStorage.setItem("phone", editPhone);
-                      if (pendingAvatar) {
-                        setAvatar(pendingAvatar);
-                        localStorage.setItem("avatar", pendingAvatar);
-                        setPendingAvatar(null);
-                      }
-                      setSaveMsg("تم الحفظ بنجاح");
-                      setTimeout(() => setSaveMsg(""), 2000);
-                      setEditMode(false);
-                    }}
-                  >
-                    حفظ
-                  </button>
-                  <button
-                    style={{
-                      background: "#eee",
-                      color: "#333",
-                      border: "none",
-                      borderRadius: 5,
-                      padding: "6px 16px",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => {
-                      setEditMode(false);
-                      setEditName(fullName);
-                      setEditEmail(emailLS);
-                      setEditPhone(phoneLS);
-                      setPendingAvatar(null);
-                    }}
-                  >
-                    إلغاء
-                  </button>
-                </div>
-                {saveMsg && (
-                  <div style={{ color: "green", marginTop: 8 }}>{saveMsg}</div>
-                )}
-              </>
-            ) : (
-              <div
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: "8px",
-                }}
-              >
-                <ProfileName>{fullName}</ProfileName>
-                <div
-                  style={{ display: "flex", alignItems: "center", gap: "16px" }}
-                >
-                  <ProfileEmail>
-                    <i className="fas fa-envelope"></i> {emailLS}
-                  </ProfileEmail>
-                  {phoneLS && (
-                    <ProfilePhone>
-                      <i className="fas fa-phone"></i> {phoneLS}
-                    </ProfilePhone>
-                  )}
-                </div>
-                {userData && (
-                  <div
-                    style={{
-                      fontSize: "12px",
-                      color: "#666",
-                      marginTop: "4px",
-                      padding: "4px 8px",
-                      background: "#e8f5e9",
-                      borderRadius: "4px",
-                      border: "1px solid #c8e6c9",
-                    }}
-                  >
-                    <i className="fas fa-check-circle"></i> البيانات محدثة من
-                    الخادم
-                  </div>
-                )}
-              </div>
-            )}
-          </ProfileInfo>
-          {!loading && !error && (
-            <EditProfileBtn onClick={() => setEditMode(true)}>
-              <i className="fas fa-edit"></i>
-              تعديل الملف الشخصي
-            </EditProfileBtn>
-          )}
-        </ProfileHeader>
-
-        <ProfileStats>
-          <StatItem>
-            <StatNumber>{reservations.length}</StatNumber>
-            <StatLabel>إجمالي الحجوزات</StatLabel>
-          </StatItem>
-          <StatItem>
-            <StatNumber>
-              {reservations.filter((r) => r.status === "active").length}
-            </StatNumber>
-            <StatLabel>حجوزات نشطة</StatLabel>
-          </StatItem>
-          <StatItem>
-            <StatNumber>
-              {reservations.filter((r) => r.status === "completed").length}
-            </StatNumber>
-            <StatLabel>حجوزات مكتملة</StatLabel>
-          </StatItem>
-        </ProfileStats>
-
-        <ProfileSections>
-          <ProfileSection>
-            <SectionTitle>
-              <i className="fas fa-plane"></i> الحجوزات
-            </SectionTitle>
-            {reservationsLoading ? (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: 20,
-                }}
-              >
-                <i
-                  className="fas fa-spinner fa-spin"
-                  style={{ color: "#1976d2", fontSize: 24 }}
-                ></i>
-                <span style={{ marginLeft: 10, color: "#666" }}>
-                  جاري تحميل الحجوزات...
-                </span>
-              </div>
-            ) : reservationsError ? (
-              <div
-                style={{
-                  color: "#c62828",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  padding: 20,
-                  flexDirection: "column",
-                  gap: 10,
-                }}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                  <i className="fas fa-exclamation-triangle"></i>
-                  <span>{reservationsError}</span>
-                </div>
-                <button
-                  onClick={() => window.location.reload()}
-                  style={{
-                    background: "#1976d2",
-                    color: "#fff",
-                    border: "none",
-                    borderRadius: "4px",
-                    padding: "8px 16px",
-                    fontSize: "14px",
-                    cursor: "pointer",
-                  }}
-                >
-                  إعادة المحاولة
-                </button>
-              </div>
-            ) : reservations.length === 0 ? (
-              <div
-                style={{
-                  textAlign: "center",
-                  padding: 40,
-                  color: "#666",
-                }}
-              >
-                <i
-                  className="fas fa-plane"
-                  style={{ fontSize: 48, marginBottom: 16, opacity: 0.5 }}
-                ></i>
-                <div>لا توجد حجوزات حالياً</div>
-              </div>
-            ) : (
-              <>
-                {reservations.map((reservation, index) => (
-                  <ReservationItem key={index}>
-                    <ReservationFlight>
-                      {getAirportName(reservation.departureAirport)} -{" "}
-                      {getAirportName(reservation.arrivalAirport)}
-                    </ReservationFlight>
-                    <ReservationDates>
-                      <div style={{ marginBottom: 4 }}>
-                        <i
-                          className="fas fa-plane-departure"
-                          style={{ color: "#1976d2", marginRight: 8 }}
-                        ></i>
-                        <strong>مغادرة:</strong>{" "}
-                        {formatDate(reservation.departureDate)}
-                      </div>
-                      <div>
-                        <i
-                          className="fas fa-plane-arrival"
-                          style={{ color: "#4caf50", marginRight: 8 }}
-                        ></i>
-                        <strong>وصول:</strong>{" "}
-                        {formatDate(reservation.arrivalDate)}
-                      </div>
-                    </ReservationDates>
-                    <ReservationStatus status="active">نشط</ReservationStatus>
-                  </ReservationItem>
-                ))}
-              </>
-            )}
-          </ProfileSection>
-
-          <ProfileSection>
-            <SectionTitle>
-              <i className="fas fa-cog"></i> الإعدادات
-            </SectionTitle>
-            <ReservationItem
-              style={{
-                display: "flex",
-                alignItems: "center",
-                position: "relative",
-              }}
-            >
-              <Link
-                to="#"
-                style={{
-                  textDecoration: "none",
-                  color: "#333",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-                onClick={handleNotificationClick}
-              >
-                <i className="fas fa-bell"></i> إعدادات الإشعارات
-              </Link>
-              {notifSaved && <SuccessMsg>تم الحفظ</SuccessMsg>}
-              {showNotificationBox && (
-                <NotificationBox>
-                  <NotificationTitle>إعدادات الإشعارات</NotificationTitle>
-                  <NotificationOption>
-                    <NotificationCheckbox
-                      type="checkbox"
-                      checked={emailNotif}
-                      onChange={(e) => setEmailNotif(e.target.checked)}
-                    />
-                    البريد الإلكتروني
-                  </NotificationOption>
-                  <NotificationOption>
-                    <NotificationCheckbox
-                      type="checkbox"
-                      checked={smsNotif}
-                      onChange={(e) => setSmsNotif(e.target.checked)}
-                    />
-                    رسائل SMS
-                  </NotificationOption>
-                  <NotificationOption>
-                    <NotificationCheckbox
-                      type="checkbox"
-                      checked={pushNotif}
-                      onChange={(e) => setPushNotif(e.target.checked)}
-                    />
-                    إشعارات التطبيق
-                  </NotificationOption>
-                  <NotificationActions>
-                    <NotificationButton
-                      type="button"
-                      onClick={handleNotificationSave}
-                    >
-                      حفظ
-                    </NotificationButton>
-                    <NotificationCancel
-                      type="button"
-                      onClick={handleNotificationCancel}
-                    >
-                      إلغاء
-                    </NotificationCancel>
-                  </NotificationActions>
-                </NotificationBox>
-              )}
-            </ReservationItem>
-            <ReservationItem
-              style={{
-                display: "flex",
-                alignItems: "center",
-                position: "relative",
-              }}
-            >
-              <Link
-                to="#"
-                style={{
-                  textDecoration: "none",
-                  color: "#333",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-                onClick={handlePasswordClick}
-              >
-                <i className="fas fa-lock"></i> تغيير كلمة المرور
-              </Link>
-              {passwordSaved && <SuccessMsg>تم الحفظ</SuccessMsg>}
-              {showPasswordForm && (
-                <PasswordForm onSubmit={handlePasswordSave}>
-                  <PasswordInput
-                    type="password"
-                    placeholder="كلمة المرور القديمة"
-                    value={oldPassword}
-                    onChange={(e) => setOldPassword(e.target.value)}
-                    required
-                  />
-                  <PasswordInput
-                    type="password"
-                    placeholder="كلمة المرور الجديدة"
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    required
-                  />
-                  <PasswordInput
-                    type="password"
-                    placeholder="تأكيد كلمة المرور الجديدة"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    required
-                  />
-                  <PasswordActions>
-                    <PasswordButton type="submit">حفظ</PasswordButton>
-                    <PasswordCancel
-                      type="button"
-                      onClick={handlePasswordCancel}
-                    >
-                      إلغاء
-                    </PasswordCancel>
-                  </PasswordActions>
-                </PasswordForm>
-              )}
-            </ReservationItem>
-            <ReservationItem
-              style={{
-                display: "flex",
-                alignItems: "center",
-                position: "relative",
-              }}
-            >
-              <Link
-                to="#"
-                style={{
-                  textDecoration: "none",
-                  color: "#333",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-                onClick={(e) => {
-                  e.preventDefault();
-                  setShowForgotModal((prev) => !prev);
-                }}
-              >
-                <i className="fas fa-unlock-alt"></i> نسيت كلمة المرور
-              </Link>
-              {showForgotModal && (
-                <div
-                  style={{
-                    background: "#f8f9fa",
-                    borderRadius: 8,
-                    padding: 16,
-                    marginRight: 16,
-                    minWidth: 220,
-                  }}
-                >
-                  <form
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      if (!forgotEmail) {
-                        setForgotError("يرجى إدخال البريد الإلكتروني");
-                        setForgotMsg("");
-                        return;
-                      }
-                      setForgotError("");
-                      setForgotMsg(
-                        "تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني "
-                      );
-                      setForgotEmail("");
-                    }}
-                  >
-                    <input
-                      type="email"
-                      placeholder="البريد الإلكتروني"
-                      value={forgotEmail}
-                      onChange={(e) => setForgotEmail(e.target.value)}
-                      style={{
-                        width: "100%",
-                        padding: 8,
-                        borderRadius: 5,
-                        border: forgotError
-                          ? "1px solid red"
-                          : "1px solid #ccc",
-                        marginBottom: 8,
-                      }}
-                    />
-                    {forgotError && (
-                      <div
-                        style={{
-                          color: "red",
-                          fontSize: "13px",
-                          marginBottom: "8px",
-                          textAlign: "end",
-                        }}
-                      >
-                        {forgotError}
-                      </div>
-                    )}
-                    {forgotMsg && (
-                      <div
-                        style={{
-                          color: "green",
-                          fontSize: "13px",
-                          marginBottom: "8px",
-                          textAlign: "end",
-                        }}
-                      >
-                        {forgotMsg}
-                      </div>
-                    )}
-                    <button
-                      type="submit"
-                      style={{
-                        background: "#00233d",
-                        color: "#fff",
-                        border: "none",
-                        borderRadius: 6,
-                        padding: "8px 20px",
-                        fontSize: "1rem",
-                        cursor: "pointer",
-                      }}
-                    >
-                      إرسال
-                    </button>
-                  </form>
-                </div>
-              )}
-            </ReservationItem>
-            <ReservationItem
-              style={{
-                display: "flex",
-                alignItems: "center",
-                position: "relative",
-              }}
-            >
-              <Link
-                to="#"
-                style={{
-                  textDecoration: "none",
-                  color: "#333",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 8,
-                }}
-                onClick={handlePaymentClick}
-              >
-                <i className="fas fa-credit-card"></i> طرق الدفع
-              </Link>
-              {paymentSaved && <SuccessMsg>تم الحفظ</SuccessMsg>}
-              {showPaymentBox && (
-                <PaymentBox>
-                  <PaymentTitle>إضافة بطاقة جديدة</PaymentTitle>
-                  <PaymentInput
-                    type="text"
-                    placeholder="رقم البطاقة"
-                    value={cardNumber}
-                    onChange={(e) => setCardNumber(e.target.value)}
-                    required
-                  />
-                  <PaymentInput
-                    type="text"
-                    placeholder="اسم حامل البطاقة"
-                    value={cardName}
-                    onChange={(e) => setCardName(e.target.value)}
-                    required
-                  />
-                  <PaymentInput
-                    type="text"
-                    placeholder="تاريخ الانتهاء (MM/YY)"
-                    value={expiry}
-                    onChange={(e) => setExpiry(e.target.value)}
-                    required
-                  />
-                  <PaymentInput
-                    type="text"
-                    placeholder="CVV"
-                    value={cvv}
-                    onChange={(e) => setCvv(e.target.value)}
-                    required
-                  />
-                  <PaymentActions>
-                    <PaymentButton type="button" onClick={handlePaymentSave}>
-                      حفظ
-                    </PaymentButton>
-                    <PaymentCancel type="button" onClick={handlePaymentCancel}>
-                      إلغاء
-                    </PaymentCancel>
-                  </PaymentActions>
-                </PaymentBox>
-              )}
-            </ReservationItem>
-          </ProfileSection>
-        </ProfileSections>
-
-        <LinkedAccountsBox>
-          <LinkedAccountsTitle>الحسابات المرتبطة</LinkedAccountsTitle>
-          <LinkedAccountsRowFlex>
-            <LinkedAccountCol>
-              <i
-                className="fab fa-google"
-                style={{
-                  color: "#EA4335",
-                  fontSize: 32,
-                  marginBottom: 0,
-                  marginleft: 10,
-                }}
-              ></i>
-
-              {linkedGoogle ? (
-                <LinkedAccountUnlink
-                  onClick={() => setLinkedGoogle(false)}
-                  style={{ marginTop: 10 }}
-                >
-                  إلغاء الربط
-                </LinkedAccountUnlink>
-              ) : (
-                <LinkedAccountBtn
-                  onClick={() => setLinkedGoogle(true)}
-                  style={{ marginTop: 10 }}
-                >
-                  ربط
-                </LinkedAccountBtn>
-              )}
-            </LinkedAccountCol>
-            <LinkedAccountCol>
-              <i
-                className="fab fa-facebook-f"
-                style={{
-                  color: "#1877F3",
-                  fontSize: 32,
-                  marginBottom: 0,
-                  marginLeft: 10,
-                }}
-              ></i>
-
-              {linkedFacebook ? (
-                <LinkedAccountUnlink
-                  onClick={() => setLinkedFacebook(false)}
-                  style={{ marginTop: 10 }}
-                >
-                  إلغاء الربط
-                </LinkedAccountUnlink>
-              ) : (
-                <LinkedAccountBtn
-                  onClick={() => setLinkedFacebook(true)}
-                  style={{ marginTop: 10 }}
-                >
-                  ربط
-                </LinkedAccountBtn>
-              )}
-            </LinkedAccountCol>
-            <LinkedAccountCol>
-              <i
-                className="fab fa-x-twitter"
-                style={{
-                  color: "#000",
-                  fontSize: 32,
-                  marginBottom: 0,
-                  marginLeft: 10,
-                }}
-              ></i>
-
-              {linkedTwitter ? (
-                <LinkedAccountUnlink
-                  onClick={() => setLinkedTwitter(false)}
-                  style={{ marginTop: 10 }}
-                >
-                  إلغاء الربط
-                </LinkedAccountUnlink>
-              ) : (
-                <LinkedAccountBtn
-                  onClick={() => setLinkedTwitter(true)}
-                  style={{ marginTop: 10 }}
-                >
-                  ربط
-                </LinkedAccountBtn>
-              )}
-            </LinkedAccountCol>
-          </LinkedAccountsRowFlex>
-        </LinkedAccountsBox>
-      </ProfileContainer>
-    </ProfileMainContent>
+    <div className="dashboard-layout">
+      <div className="dashboard-tabs">
+        {tabList.map((tab) => (
+          <button
+            key={tab.key}
+            className={`dashboard-tab${
+              activeSection === tab.key ? " active" : ""
+            }`}
+            onClick={() => setActiveSection(tab.key)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
+      <main className="dashboard-main">
+        {activeSection === "user" && (
+          <UserInfoSection
+            userData={userData}
+            loading={loading}
+            error={error}
+          />
+        )}
+        {activeSection === "settings" && <SettingsSection />}
+        {activeSection === "trips" && (
+          <TripsSection
+            trips={reservations}
+            loading={reservationsLoading}
+            error={reservationsError}
+            hotelReservations={hotelReservations}
+            hotelReservationsLoading={hotelReservationsLoading}
+            hotelReservationsError={hotelReservationsError}
+            setHotelReservations={setHotelReservations}
+          />
+        )}
+      </main>
+    </div>
   );
 };
 

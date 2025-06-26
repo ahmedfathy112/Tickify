@@ -138,7 +138,7 @@ const Footer = () => {
           <h3>{language === 'ar' ? 'المساعدة' : 'Help'}</h3>
           <ul>
             <li><Link to="/cancellation">{language === 'ar' ? 'سياسة الإلغاء' : 'Cancellation Policy'}</Link></li>
-            <li><Link to="/contactus">{language === 'ar' ? 'اتصل بنا' : 'Contact Us'}</Link></li>
+            <li><span>{language === 'ar' ? 'اتصل بنا' : 'Contact Us'}</span></li>
           </ul>
         </FooterSection>
         <FooterSection>

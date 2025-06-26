@@ -1,21 +1,16 @@
 import React, { useState } from "react";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { useLanguage } from "../context/LanguageContext";
 import { useNavigate } from "react-router-dom";
 import { useSidebar } from "../context/SidebarContext";
+import googleLogo from '../images/google.png';
+import facebookLogo from '../images/facebook.png';
+import xLogo from '../images/X.png';
 
-const Container = styled.div`
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  background-color: #f5f5f5;
-  width: 100%;
-  padding: 20px;
-
-  @media (max-width: 768px) {
-    padding: 10px;
+const LoginGlobalStyle = createGlobalStyle`
+  body {
+    padding: 0 !important;
   }
 `;
 
@@ -26,8 +21,7 @@ const LoginCard = styled.div`
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
   width: 100%;
   max-width: 450px;
-  margin-top: -15rem;
-  margin-right: 7rem;
+  margin: 0px;
 
   @media (max-width: 768px) {
     padding: 30px;
@@ -40,7 +34,7 @@ const LoginTitle = styled.h1`
   color: #00233d;
   font-size: 32px;
   margin-bottom: 8px;
-  text-align: end;
+ 
   font-weight: bold;
   margin-top: -25px;
   margin-left: -15px;
@@ -57,7 +51,7 @@ const LoginSubtitle = styled.h2`
   font-size: 16px;
   font-weight: normal;
   margin-bottom: 30px;
-  text-align: end;
+ 
   margin-left: -15px;
 
   @media (max-width: 768px) {
@@ -74,7 +68,7 @@ const FormGroup = styled.div`
     color: #00233d;
     margin-bottom: 8px;
     font-size: 14px;
-    text-align: end;
+   
     margin-left: -1rem;
 
     @media (max-width: 768px) {
@@ -90,8 +84,8 @@ const FormGroup = styled.div`
     border-radius: 8px;
     font-size: 16px;
     transition: border-color 0.3s;
-    margin-right: 20px;
-    padding-right: 5rem;
+    margin-right: 0px;
+    padding-right: 20px;
 
     @media (max-width: 768px) {
       padding-right: 12px;
@@ -297,6 +291,38 @@ const SignupLink = styled.div`
   }
 `;
 
+const ForgotPasswordModal = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+`;
+const ForgotPasswordBox = styled.div`
+  background: #fff;
+  border-radius: 12px;
+  padding: 32px 24px;
+  min-width: 320px;
+  max-width: 90vw;
+  box-shadow: 0 4px 16px #0002;
+  position: relative;
+`;
+const CloseBtn = styled.button`
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #888;
+`;
+
 const Login = () => {
   const { language } = useLanguage();
   const navigate = useNavigate();
@@ -308,6 +334,9 @@ const Login = () => {
   const [passwordError, setPasswordError] = useState("");
   const [apiError, setApiError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showForgotForm, setShowForgotForm] = useState(false);
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotSent, setForgotSent] = useState(false);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -384,7 +413,8 @@ const Login = () => {
   };
 
   return (
-    <Container>
+    <>
+      <LoginGlobalStyle />
       <LoginCard>
         <LoginTitle>{language === "ar" ? "تسجيل الدخول" : "Login"}</LoginTitle>
         <LoginSubtitle>
@@ -460,8 +490,8 @@ const Login = () => {
                 {language === "ar" ? "تذكرني" : "Remember me"}
               </label>
             </RememberMe>
-            <ForgotPassword href="#">
-              {language === "ar" ? "نسيت كلمة المرور؟" : "Forgot password?"}
+             <ForgotPassword href="#" onClick={e => { e.preventDefault(); setShowForgotForm(true); }}>
+              {language === 'ar' ? 'نسيت كلمة المرور؟' : 'Forgot password?'}
             </ForgotPassword>
           </FormOptions>
           <LoginButton type="submit" disabled={loading}>
@@ -496,13 +526,13 @@ const Login = () => {
           </Divider>
           <SocialButtonsContainer>
             <SocialButton className="google">
-              <i className="fab fa-google"></i>
+              <img src={googleLogo} alt="Google" />
             </SocialButton>
             <SocialButton className="facebook">
-              <i className="fab fa-facebook-f" style={{ color: "#1877F3" }}></i>
+              <img src={facebookLogo} alt="Facebook" />
             </SocialButton>
             <SocialButton className="twitter">
-              <i className="fab fa-x-twitter"></i>
+              <img src={xLogo} alt="X" />
             </SocialButton>
           </SocialButtonsContainer>
         </SocialLoginSection>
@@ -511,7 +541,38 @@ const Login = () => {
           <a href="/signup">{language === "ar" ? "إنشاء حساب" : "Sign up"}</a>
         </SignupLink>
       </LoginCard>
-    </Container>
+      {showForgotForm && (
+        <ForgotPasswordModal>
+          <ForgotPasswordBox>
+            <CloseBtn onClick={() => setShowForgotForm(false)}>&times;</CloseBtn>
+            <h2 style={{textAlign:'center', color:'#00233d', marginBottom:16}}>
+              {language === 'ar' ? 'استعادة كلمة المرور' : 'Reset Password'}
+            </h2>
+            {forgotSent ? (
+              <div style={{color:'#1976d2', textAlign:'center', margin:'16px 0'}}>
+                {language === 'ar' ? 'تم إرسال رابط إعادة تعيين كلمة المرور إلى بريدك الإلكتروني ' : 'A reset link has been sent to your email (mock).'}
+              </div>
+            ) : (
+              <form onSubmit={e => { e.preventDefault(); setForgotSent(true); }}>
+                <FormGroup>
+                 
+                  <input
+                    type="email"
+                    value={forgotEmail}
+                    onChange={e => setForgotEmail(e.target.value)}
+                    placeholder={language === 'ar' ? 'أدخل بريدك الإلكتروني' : 'Enter your email'}
+                    required
+                  />
+                </FormGroup>
+                <LoginButton type="submit" style={{marginTop:8}}>
+                  {language === 'ar' ? 'إرسال' : 'Send'}
+                </LoginButton>
+              </form>
+            )}
+          </ForgotPasswordBox>
+        </ForgotPasswordModal>
+      )}
+    </>
   );
 };
 

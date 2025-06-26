@@ -1,9 +1,18 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useLanguage } from "../context/LanguageContext";
+import { useBooking } from "../context/BookingContext";
 import Swal from "sweetalert2";
 import { isLoggedIn } from "../context/checkAuth";
+
+const FlightResultsGlobalStyle = createGlobalStyle`
+  @media (max-width: 768px) {
+    body {
+      padding: 0 !important;
+    }
+  }
+`;
 
 const ResultsContainer = styled.div`
   width: 100vw;
@@ -14,6 +23,12 @@ const ResultsContainer = styled.div`
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   padding: 32px 24px;
+  @media (max-width: 768px) {
+    padding: 12px 2px;
+    border-radius: 0;
+    margin-top: 0 !important;
+    box-shadow: none;
+  }
 `;
 const Title = styled.h2`
   color: #00233d;
@@ -31,6 +46,13 @@ const SearchSummary = styled.div`
   justify-content: space-between;
   align-items: center;
   width: 789px;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    width: 100%;
+    padding: 10px 4px;
+    font-size: 1rem;
+    margin-bottom: 18px;
+  }
 `;
 const ResultsList = styled.div`
   display: flex;
@@ -45,6 +67,12 @@ const ResultCard = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
+  @media (max-width: 768px) {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px 6px;
+    gap: 10px;
+  }
 `;
 const BookBtn = styled.button`
   background: #00233d;
@@ -59,6 +87,11 @@ const BookBtn = styled.button`
     background: #001a33;
   }
   margin-right: 10px;
+  @media (max-width: 768px) {
+    width: 90px;
+    font-size: 0.95rem;
+    padding: 8px 0;
+  }
 `;
 const FlightLineContainer = styled.div`
   display: flex;
@@ -129,6 +162,14 @@ const FilterButton = styled.button`
   &:hover {
     background: #1251a3;
   }
+  @media (max-width: 768px) {
+    width: 90px;
+    font-size: 0.95rem;
+    padding: 10px 0;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
 `;
 const ResultsFlex = styled.div`
   display: flex;
@@ -138,6 +179,9 @@ const ResultsFlex = styled.div`
   @media (max-width: 900px) {
     flex-direction: column;
     gap: 0.5rem;
+  }
+  @media (max-width: 768px) {
+    gap: 0.2rem;
   }
 `;
 
@@ -157,14 +201,94 @@ const sortOptions = [
   },
 ];
 
+const HotelBookingButton = styled.button`
+  background: ${(props) => (props.disabled ? "#ccc" : "#28a745")};
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  transition: all 0.3s ease;
+  margin: 20px auto;
+  display: block;
+  font-weight: 600;
+  opacity: ${(props) => (props.disabled ? 0.6 : 1)};
+
+  &:hover {
+    background: ${(props) => (props.disabled ? "#ccc" : "#218838")};
+    transform: ${(props) => (props.disabled ? "none" : "translateY(-2px)")};
+  }
+
+  i {
+    margin-left: 0.5rem;
+  }
+`;
+
+const CarBookingButton = styled.button`
+  background: ${(props) => (props.disabled ? "#ccc" : "#28a745")};
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  padding: 12px 24px;
+  font-size: 1rem;
+  cursor: ${(props) => (props.disabled ? "not-allowed" : "pointer")};
+  transition: all 0.3s ease;
+  margin: 10px auto 0 auto;
+  display: block;
+  font-weight: 600;
+  opacity: ${(props) => (props.disabled ? 0.6 : 1)};
+
+  &:hover {
+    background: ${(props) => (props.disabled ? "#ccc" : "#218838")};
+    transform: ${(props) => (props.disabled ? "none" : "translateY(-2px)")};
+  }
+
+  i {
+    margin-left: 0.5rem;
+  }
+`;
+
+const BookingStatus = styled.div`
+  background: ${(props) =>
+    props.hasBooking
+      ? "linear-gradient(135deg, #4ecdc4, #44a08d)"
+      : "linear-gradient(135deg, #ff6b6b, #ee5a52)"};
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin: 1rem 0;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+  h4 {
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 0.95rem;
+  }
+`;
+
 const FlightResults = () => {
   const { language } = useLanguage();
+  const { addFlightBooking } = useBooking();
   const location = useLocation();
   const navigate = useNavigate();
 
   const [sortOpen, setSortOpen] = useState(false);
   const [sortBy, setSortBy] = useState("all");
   const [bookingLoading, setBookingLoading] = useState(false);
+  const [showHotelForm, setShowHotelForm] = useState(false);
+  const [hotelFormError, setHotelFormError] = useState("");
+  const [showCarForm, setShowCarForm] = useState(false);
+  const [carPickupLocation, setCarPickupLocation] = useState("");
+  const [carFormError, setCarFormError] = useState("");
+  const [isSmallScreen, setIsSmallScreen] = useState(false);
 
   const search = location.state || {};
   const {
@@ -179,11 +303,23 @@ const FlightResults = () => {
     showAllFlights,
   } = search;
 
+  const [hotelDestination, setHotelDestination] = useState(destination || "");
   const [minPrice, setMinPrice] = useState(initialMin ?? 0);
   const [maxPrice, setMaxPrice] = useState(initialMax ?? 5000);
   const [filteredResults, setFilteredResults] = useState(results || []);
   const minGap = 50;
   const maxLimit = 5000;
+
+  React.useEffect(() => {
+    if (destination) setCarPickupLocation(destination);
+  }, [destination]);
+
+  useEffect(() => {
+    const checkScreen = () => setIsSmallScreen(window.innerWidth <= 768);
+    checkScreen();
+    window.addEventListener("resize", checkScreen);
+    return () => window.removeEventListener("resize", checkScreen);
+  }, []);
 
   const parseDurationToMinutes = (durationFormatted) => {
     if (!durationFormatted) return 0;
@@ -324,10 +460,26 @@ const FlightResults = () => {
         }
       );
       if (!response.ok) throw new Error("Reservation failed");
+
+      // Add flight booking to context
+      const flightData = {
+        flightId,
+        classId,
+        from: origin,
+        to: destination,
+        departureDate: departureDate,
+        cabinClass: cabinClass,
+      };
+      addFlightBooking(flightData);
+
       await Swal.fire({
         icon: "success",
         title:
           language === "ar" ? "تم الحجز بنجاح!" : "Reservation successful!",
+        text:
+          language === "ar"
+            ? "يمكنك الآن حجز فندق في وجهتك!"
+            : "You can now book a hotel at your destination!",
         confirmButtonText: language === "ar" ? "حسناً" : "OK",
       });
     } catch {
@@ -374,324 +526,823 @@ const FlightResults = () => {
   }
 
   return (
-    <ResultsFlex>
-      <Sidebar>
-        <label
-          style={{
-            color: "#00233d",
-            fontWeight: 600,
-            marginBottom: 4,
-            fontSize: "1.08rem",
-            letterSpacing: "0.5px",
-          }}
-        >
-          {language === "ar" ? "نطاق السعر" : "Price Range"}
-        </label>
-        <PriceLabels>
-          <span>
-            {language === "ar" ? "الحد الأدنى" : "Min"}: {minPrice} $
-          </span>
-          <span>
-            {language === "ar" ? "الحد الأقصى" : "Max"}: {maxPrice} $
-          </span>
-        </PriceLabels>
-        <div
-          style={{
-            display: "flex",
-            gap: 10,
-            width: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-            marginBottom: 8,
-          }}
-        >
-          <ManualSlider
-            type="range"
-            min={0}
-            max={maxLimit}
-            value={minPrice}
-            onChange={handleMinPriceChange}
-          />
-          <ManualSlider
-            type="range"
-            min={0}
-            max={maxLimit}
-            value={maxPrice}
-            onChange={handleMaxPriceChange}
-          />
-        </div>
-        <div style={{ color: "#666", fontSize: "0.97rem", marginTop: 2 }}>
-          {language === "ar"
-            ? "يجب أن يكون الفرق بين الحدين الأدنى والأقصى 50 دولارًا على الأقل."
-            : "The minimum gap between min and max is $50."}
-        </div>
-        <FilterButton onClick={handleFilter}>
-          {language === "ar" ? "بحث" : "Search"}
-        </FilterButton>
-      </Sidebar>
-      <div style={{ flex: 1 }}>
-        <Title>
-          {showAllFlights
-            ? language === "ar"
-              ? "عرض جميع الرحلات المتاحة في النظام"
-              : "Showing all available flights in the system"
-            : language === "ar"
-            ? "نتائج البحث عن الرحلات"
-            : "Flight Search Results"}
-        </Title>
-        <div
-          style={{
-            width: "auto",
-            display: "flex",
-            justifyContent: "flex-end",
-            marginBottom: "8px",
-          }}
-        >
+    <>
+      <FlightResultsGlobalStyle />
+      <ResultsFlex>
+        {/* Sidebar for large screens */}
+        {!isSmallScreen && (
           <div
             style={{
-              position: "relative",
               display: "flex",
-              alignItems: "center",
-              gap: 8,
+              flexDirection: "column",
+              alignItems: "flex-start",
             }}
           >
-            <button
-              onClick={() => setSortOpen((v) => !v)}
-              style={{
-                background: "#fff",
-                border: "1px solid #ccc",
-                borderRadius: 8,
-                padding: "7px 18px",
-                fontWeight: "bold",
-                cursor: "pointer",
-                minWidth: 120,
-                display: "flex",
-                alignItems: "center",
-                gap: 8,
-              }}
-            >
-              {
-                sortOptions.find((o) => o.value === sortBy)[
-                  language === "ar" ? "labelAr" : "labelEn"
-                ]
-              }
-              <span style={{ fontSize: "1.2em" }}>{sortOpen ? "▲" : "▼"}</span>
-            </button>
-            {sortOpen && (
-              <div
+            <Sidebar>
+              <label
                 style={{
-                  position: "absolute",
-                  top: "110%",
-                  left: 0,
-                  right: 0,
-                  background: "#fff",
-                  border: "1px solid #ccc",
-                  borderRadius: 8,
-                  zIndex: 10,
-                  boxShadow: "0 2px 8px #eee",
-                  minWidth: 150,
+                  color: "#00233d",
+                  fontWeight: 600,
+                  marginBottom: 4,
+                  fontSize: "1.08rem",
+                  letterSpacing: "0.5px",
                 }}
               >
-                {sortOptions.map((opt) => (
-                  <div
-                    key={opt.value}
-                    onClick={() => {
-                      setSortBy(opt.value);
-                      setSortOpen(false);
-                    }}
-                    style={{
-                      padding: "10px 16px",
-                      cursor: "pointer",
-                      fontWeight: sortBy === opt.value ? "bold" : "normal",
-                      background: sortBy === opt.value ? "#f5f7fa" : "#fff",
-                      textAlign: language === "ar" ? "right" : "left",
-                    }}
-                  >
-                    {language === "ar" ? opt.labelAr : opt.labelEn}
-                  </div>
-                ))}
+                {language === "ar" ? "نطاق السعر" : "Price Range"}
+              </label>
+              <PriceLabels>
+                <span>
+                  {language === "ar" ? "الحد الأدنى" : "Min"}: {minPrice} $
+                </span>
+                <span>
+                  {language === "ar" ? "الحد الأقصى" : "Max"}: {maxPrice} $
+                </span>
+              </PriceLabels>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  width: "100%",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <ManualSlider
+                  type="range"
+                  min={0}
+                  max={maxLimit}
+                  value={minPrice}
+                  onChange={handleMinPriceChange}
+                />
+                <ManualSlider
+                  type="range"
+                  min={0}
+                  max={maxLimit}
+                  value={maxPrice}
+                  onChange={handleMaxPriceChange}
+                />
               </div>
+              <div style={{ color: "#666", fontSize: "0.97rem", marginTop: 2 }}>
+                {language === "ar"
+                  ? "يجب أن يكون الفرق بين الحدين الأدنى والأقصى 50 دولارًا على الأقل."
+                  : "The minimum gap between min and max is $50."}
+              </div>
+              <FilterButton onClick={handleFilter}>
+                {language === "ar" ? "بحث" : "Search"}
+              </FilterButton>
+            </Sidebar>
+
+            <HotelBookingButton
+              onClick={() => {
+                setShowCarForm(false);
+                setShowHotelForm((v) => !v);
+              }}
+            >
+              <i className="fas fa-hotel"></i>
+              {language === "ar" ? "احجز فندقك" : "Book Hotel"}
+            </HotelBookingButton>
+            {showHotelForm && (
+              <form
+                style={{
+                  background: "#fff",
+                  boxShadow: "0 2px 8px #eee",
+                  borderRadius: 10,
+                  padding: 20,
+                  marginTop: 10,
+                  minWidth: 250,
+                  width: "100%",
+                  maxWidth: 350,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!hotelDestination.trim()) {
+                    setHotelFormError(
+                      language === "ar"
+                        ? "يرجى إدخال الوجهة"
+                        : "Please enter a destination"
+                    );
+                    return;
+                  }
+                  setHotelFormError("");
+                  navigate("/hotels/results", {
+                    state: { destination: hotelDestination },
+                  });
+                }}
+              >
+                <label
+                  style={{ fontWeight: 600, color: "#00233d", marginBottom: 4 }}
+                >
+                  {language === "ar" ? "الوجهة" : "Destination"}
+                </label>
+                <div style={{ position: "relative" }}>
+                  <i
+                    className="fas fa-map-marker-alt input-icon"
+                    style={{
+                      position: "absolute",
+                      left: 10,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: "#888",
+                      fontSize: "1.1rem",
+                    }}
+                  ></i>
+                  <input
+                    type="text"
+                    value={hotelDestination}
+                    onChange={(e) => setHotelDestination(e.target.value)}
+                    placeholder={
+                      language === "ar"
+                        ? "أين تريد أن تذهب؟"
+                        : "Where do you want to go?"
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "0.7rem 0.7rem 0.7rem 2.2rem",
+                      border: hotelFormError
+                        ? "1px solid red"
+                        : "1px solid #ddd",
+                      borderRadius: 8,
+                      fontSize: "1rem",
+                      color: "#00233d",
+                      outline: "none",
+                    }}
+                    className={hotelFormError ? "error" : ""}
+                  />
+                </div>
+                {hotelFormError && (
+                  <div style={{ color: "red", fontSize: 13, marginTop: 2 }}>
+                    {hotelFormError}
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  style={{
+                    background: "#00233d",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 8,
+                    padding: "0.8rem 1.5rem",
+                    fontSize: "1.1rem",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    marginTop: 8,
+                    width: "100%",
+                  }}
+                >
+                  {language === "ar" ? "بحث" : "Search"}
+                </button>
+              </form>
+            )}
+            <CarBookingButton
+              onClick={() => {
+                setShowHotelForm(false);
+                setShowCarForm((v) => !v);
+              }}
+            >
+              <i className="fas fa-car"></i>
+              {language === "ar" ? "احجز سيارتك" : "Book Car"}
+            </CarBookingButton>
+            {showCarForm && (
+              <form
+                style={{
+                  background: "#fff",
+                  boxShadow: "0 2px 8px #eee",
+                  borderRadius: 10,
+                  padding: 20,
+                  marginTop: 10,
+                  minWidth: 250,
+                  width: "100%",
+                  maxWidth: 350,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 12,
+                }}
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  if (!carPickupLocation.trim()) {
+                    setCarFormError(
+                      language === "ar"
+                        ? "يرجى إدخال مكان الاستلام"
+                        : "Please enter a pickup location"
+                    );
+                    return;
+                  }
+                  setCarFormError("");
+                  navigate("/available-cars", {
+                    state: { pickupLocation: carPickupLocation },
+                  });
+                }}
+              >
+                <label
+                  style={{ fontWeight: 600, color: "#00233d", marginBottom: 4 }}
+                >
+                  {language === "ar" ? "مكان الاستلام" : "Pickup Location"}
+                </label>
+                <div style={{ position: "relative" }}>
+                  <i
+                    className="fas fa-map-marker-alt input-icon"
+                    style={{
+                      position: "absolute",
+                      left: 10,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      color: "#888",
+                      fontSize: "1.1rem",
+                    }}
+                  ></i>
+                  <input
+                    type="text"
+                    value={carPickupLocation}
+                    onChange={(e) => setCarPickupLocation(e.target.value)}
+                    placeholder={
+                      language === "ar"
+                        ? "أين تريد استلام السيارة؟"
+                        : "Where do you want to pick up the car?"
+                    }
+                    style={{
+                      width: "100%",
+                      padding: "0.7rem 0.7rem 0.7rem 2.2rem",
+                      border: carFormError ? "1px solid red" : "1px solid #ddd",
+                      borderRadius: 8,
+                      fontSize: "1rem",
+                      color: "#00233d",
+                      outline: "none",
+                    }}
+                    className={carFormError ? "error" : ""}
+                  />
+                </div>
+                {carFormError && (
+                  <div style={{ color: "red", fontSize: 13, marginTop: 2 }}>
+                    {carFormError}
+                  </div>
+                )}
+                <button
+                  type="submit"
+                  style={{
+                    background: "#00233d",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: 8,
+                    padding: "0.8rem 1.5rem",
+                    fontSize: "1.1rem",
+                    fontWeight: 600,
+                    cursor: "pointer",
+                    marginTop: 8,
+                    width: "100%",
+                  }}
+                >
+                  {language === "ar" ? "بحث" : "Search"}
+                </button>
+              </form>
             )}
           </div>
-        </div>
-        <SearchSummary>
-          <span style={{ marginRight: 16 }}>
+        )}
+        <div style={{ flex: 1 }}>
+          {/* Sidebar for small screens: show above results */}
+          {isSmallScreen && (
+            <Sidebar style={{ margin: "0 0 16px 0", width: "100%" }}>
+              <label
+                style={{
+                  color: "#00233d",
+                  fontWeight: 600,
+                  marginBottom: 4,
+                  fontSize: "1.08rem",
+                  letterSpacing: "0.5px",
+                }}
+              >
+                {language === "ar" ? "نطاق السعر" : "Price Range"}
+              </label>
+              <PriceLabels>
+                <span>
+                  {language === "ar" ? "الحد الأدنى" : "Min"}: {minPrice} $
+                </span>
+                <span>
+                  {language === "ar" ? "الحد الأقصى" : "Max"}: {maxPrice} $
+                </span>
+              </PriceLabels>
+              <div
+                style={{
+                  display: "flex",
+                  gap: 10,
+                  width: "100%",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  marginBottom: 8,
+                }}
+              >
+                <ManualSlider
+                  type="range"
+                  min={0}
+                  max={maxLimit}
+                  value={minPrice}
+                  onChange={handleMinPriceChange}
+                />
+                <ManualSlider
+                  type="range"
+                  min={0}
+                  max={maxLimit}
+                  value={maxPrice}
+                  onChange={handleMaxPriceChange}
+                />
+              </div>
+              <div style={{ color: "#666", fontSize: "0.97rem", marginTop: 2 }}>
+                {language === "ar"
+                  ? "يجب أن يكون الفرق بين الحدين الأدنى والأقصى 50 دولارًا على الأقل."
+                  : "The minimum gap between min and max is $50."}
+              </div>
+              <FilterButton onClick={handleFilter}>
+                {language === "ar" ? "بحث" : "Search"}
+              </FilterButton>
+            </Sidebar>
+          )}
+          {/* Title and results */}
+          <Title>
             {showAllFlights
               ? language === "ar"
                 ? "عرض جميع الرحلات المتاحة في النظام"
                 : "Showing all available flights in the system"
               : language === "ar"
-              ? `من ${origin || "-"} إلى ${destination || "-"} | مغادرة: ${
-                  departureDate || "-"
-                } | درجة المقعد: ${cabinClass || "-"}`
-              : `From ${origin || "-"} to ${destination || "-"} | Departure: ${
-                  departureDate || "-"
-                } | Cabin: ${cabinClass || "-"}`}
-          </span>
-          <BookBtn onClick={() => navigate("/")}>
-            {showAllFlights
-              ? language === "ar"
-                ? "بحث جديد"
-                : "New Search"
-              : language === "ar"
-              ? "تعديل البحث"
-              : "Edit Search"}
-          </BookBtn>
-        </SearchSummary>
-
-        <ResultsList>
-          {filteredResults.length === 0 ? (
-            <div>
-              {language === "ar"
-                ? "لا توجد رحلات متاحة"
-                : "No flights available."}
+              ? "الرحلات المتاحة"
+              : "Flight Search Results"}
+          </Title>
+          <div
+            style={{
+              width: "auto",
+              display: "flex",
+              justifyContent: "flex-end",
+              marginBottom: "8px",
+            }}
+          >
+            <div
+              style={{
+                position: "relative",
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+              }}
+            >
+              <button
+                onClick={() => setSortOpen((v) => !v)}
+                style={{
+                  background: "#fff",
+                  border: "1px solid #ccc",
+                  borderRadius: 8,
+                  padding: "7px 18px",
+                  fontWeight: "bold",
+                  cursor: "pointer",
+                  minWidth: 120,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                }}
+              >
+                {
+                  sortOptions.find((o) => o.value === sortBy)[
+                    language === "ar" ? "labelAr" : "labelEn"
+                  ]
+                }
+                <span style={{ fontSize: "1.2em" }}>
+                  {sortOpen ? "▲" : "▼"}
+                </span>
+              </button>
+              {sortOpen && (
+                <div
+                  style={{
+                    position: "absolute",
+                    top: "110%",
+                    left: 0,
+                    right: 0,
+                    background: "#fff",
+                    border: "1px solid #ccc",
+                    borderRadius: 8,
+                    zIndex: 10,
+                    boxShadow: "0 2px 8px #eee",
+                    minWidth: 150,
+                  }}
+                >
+                  {sortOptions.map((opt) => (
+                    <div
+                      key={opt.value}
+                      onClick={() => {
+                        setSortBy(opt.value);
+                        setSortOpen(false);
+                      }}
+                      style={{
+                        padding: "10px 16px",
+                        cursor: "pointer",
+                        fontWeight: sortBy === opt.value ? "bold" : "normal",
+                        background: sortBy === opt.value ? "#f5f7fa" : "#fff",
+                        textAlign: language === "ar" ? "right" : "left",
+                      }}
+                    >
+                      {language === "ar" ? opt.labelAr : opt.labelEn}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
-          ) : (
-            filteredResults.map((flight) => (
-              <ResultCard key={flight.id}>
-                <div style={{ flex: 1 }}>
-                  <div
-                    style={{
-                      fontWeight: "bold",
-                      color: "#1976d2",
-                      fontSize: "1.1em",
-                      marginBottom: "8px",
-                    }}
-                  >
-                    {flight.departureAirportName} ({flight.departureAirportCity}
-                    )
-                    <span style={{ color: "#888", margin: "0 8px" }}>
-                      &rarr;
-                    </span>
-                    {flight.arrivalAirportName} ({flight.arrivalAirportCity})
-                  </div>
-                  <div
-                    style={{
-                      color: "#444",
-                      fontSize: "0.98em",
-                      marginBottom: "8px",
-                      display: "flex",
-                      flexWrap: "wrap",
-                      gap: "20px",
-                    }}
-                  >
-                    <div>
-                      <i className="fas fa-calendar-alt"></i>{" "}
-                      <strong>
-                        {language === "ar" ? "تاريخ المغادرة:" : "Departure:"}
-                      </strong>{" "}
-                      {new Date(flight.departureDate).toLocaleDateString()}{" "}
-                      {new Date(flight.departureDate).toLocaleTimeString()}
+          </div>
+          <SearchSummary>
+            <span style={{ marginRight: 16 }}>
+              {showAllFlights
+                ? language === "ar"
+                  ? "عرض جميع الرحلات المتاحة في النظام"
+                  : "Showing all available flights in the system"
+                : language === "ar"
+                ? `من ${origin || "-"} إلى ${destination || "-"} | مغادرة: ${
+                    departureDate || "-"
+                  } | درجة المقعد: ${cabinClass || "-"}`
+                : `From ${origin || "-"} to ${
+                    destination || "-"
+                  } | Departure: ${departureDate || "-"} | Cabin: ${
+                    cabinClass || "-"
+                  }`}
+            </span>
+            <BookBtn onClick={() => navigate("/")}>
+              {showAllFlights
+                ? language === "ar"
+                  ? "بحث جديد"
+                  : "New Search"
+                : language === "ar"
+                ? "تعديل البحث"
+                : "Edit Search"}
+            </BookBtn>
+          </SearchSummary>
+
+          <ResultsList>
+            {filteredResults.length === 0 ? (
+              <div>
+                {language === "ar"
+                  ? "لا توجد رحلات متاحة"
+                  : "No flights available."}
+              </div>
+            ) : (
+              filteredResults.map((flight) => (
+                <ResultCard key={flight.id}>
+                  <div style={{ flex: 1 }}>
+                    <div
+                      style={{
+                        fontWeight: "bold",
+                        color: "#1976d2",
+                        fontSize: "1.1em",
+                        marginBottom: "8px",
+                      }}
+                    >
+                      {flight.departureAirportName} (
+                      {flight.departureAirportCity})
+                      <span style={{ color: "#888", margin: "0 8px" }}>
+                        &rarr;
+                      </span>
+                      {flight.arrivalAirportName} ({flight.arrivalAirportCity})
                     </div>
-                    <div>
-                      <i className="fas fa-calendar-check"></i>{" "}
-                      <strong>
-                        {language === "ar" ? "تاريخ الوصول:" : "Arrival:"}
-                      </strong>{" "}
-                      {new Date(flight.arrivalDate).toLocaleDateString()}{" "}
-                      {new Date(flight.arrivalDate).toLocaleTimeString()}
-                    </div>
-                    {flight.durationFormatted && (
+                    <div
+                      style={{
+                        color: "#444",
+                        fontSize: "0.98em",
+                        marginBottom: "8px",
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: "20px",
+                      }}
+                    >
                       <div>
-                        <i className="fas fa-clock"></i>{" "}
+                        <i className="fas fa-calendar-alt"></i>{" "}
                         <strong>
-                          {language === "ar" ? "مدة الرحلة:" : "Duration:"}
+                          {language === "ar" ? "تاريخ المغادرة:" : "Departure:"}
                         </strong>{" "}
-                        {flight.durationFormatted}
+                        {new Date(flight.departureDate).toLocaleDateString()}{" "}
+                        {new Date(flight.departureDate).toLocaleTimeString()}
+                      </div>
+                      <div>
+                        <i className="fas fa-calendar-check"></i>{" "}
+                        <strong>
+                          {language === "ar" ? "تاريخ الوصول:" : "Arrival:"}
+                        </strong>{" "}
+                        {new Date(flight.arrivalDate).toLocaleDateString()}{" "}
+                        {new Date(flight.arrivalDate).toLocaleTimeString()}
+                      </div>
+                      {flight.durationFormatted && (
+                        <div>
+                          <i className="fas fa-clock"></i>{" "}
+                          <strong>
+                            {language === "ar" ? "مدة الرحلة:" : "Duration:"}
+                          </strong>{" "}
+                          {flight.durationFormatted}
+                        </div>
+                      )}
+                    </div>
+                    {flight.classes && flight.classes.length > 0 && (
+                      <div
+                        style={{
+                          background: "#f8f9fa",
+                          padding: "12px",
+                          borderRadius: "8px",
+                          marginTop: "8px",
+                        }}
+                      >
+                        <div
+                          style={{
+                            fontWeight: "bold",
+                            marginBottom: "8px",
+                            color: "#333",
+                          }}
+                        >
+                          {language === "ar"
+                            ? "فئات المقاعد المتاحة:"
+                            : "Available Seat Classes:"}
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "column",
+                            gap: "8px",
+                          }}
+                        >
+                          {flight.classes.map((cls) => (
+                            <div
+                              key={cls.id}
+                              style={{
+                                display: "flex",
+                                justifyContent: "space-between",
+                                alignItems: "center",
+                                padding: "8px 12px",
+                                background: "#fff",
+                                borderRadius: "6px",
+                                border: "1px solid #e0e0e0",
+                              }}
+                            >
+                              <div
+                                style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "12px",
+                                }}
+                              >
+                                <span
+                                  style={{
+                                    fontWeight: "bold",
+                                    color: "#1976d2",
+                                  }}
+                                >
+                                  <i className="fas fa-crown"></i>{" "}
+                                  {cls.className}
+                                </span>
+                                <span style={{ color: "#666" }}>
+                                  <i className="fas fa-money-bill-wave"></i>{" "}
+                                  {cls.price} $
+                                </span>
+                              </div>
+                              <div style={{ color: "#666", fontSize: "0.9em" }}>
+                                <i className="fas fa-chair"></i>{" "}
+                                {language === "ar" ? "المقاعد:" : "Seats:"}{" "}
+                                {cls.availableSeats} / {cls.capacity}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     )}
                   </div>
-                  {flight.classes && flight.classes.length > 0 && (
-                    <div
-                      style={{
-                        background: "#f8f9fa",
-                        padding: "12px",
-                        borderRadius: "8px",
-                        marginTop: "8px",
-                      }}
-                    >
-                      <div
-                        style={{
-                          fontWeight: "bold",
-                          marginBottom: "8px",
-                          color: "#333",
-                        }}
-                      >
-                        {language === "ar"
-                          ? "فئات المقاعد المتاحة:"
-                          : "Available Seat Classes:"}
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          flexDirection: "column",
-                          gap: "8px",
-                        }}
-                      >
-                        {flight.classes.map((cls) => (
-                          <div
-                            key={cls.id}
-                            style={{
-                              display: "flex",
-                              justifyContent: "space-between",
-                              alignItems: "center",
-                              padding: "8px 12px",
-                              background: "#fff",
-                              borderRadius: "6px",
-                              border: "1px solid #e0e0e0",
-                            }}
-                          >
-                            <div
-                              style={{
-                                display: "flex",
-                                alignItems: "center",
-                                gap: "12px",
-                              }}
-                            >
-                              <span
-                                style={{ fontWeight: "bold", color: "#1976d2" }}
-                              >
-                                <i className="fas fa-crown"></i> {cls.className}
-                              </span>
-                              <span style={{ color: "#666" }}>
-                                <i className="fas fa-money-bill-wave"></i>{" "}
-                                {cls.price} $
-                              </span>
-                            </div>
-                            <div style={{ color: "#666", fontSize: "0.9em" }}>
-                              <i className="fas fa-chair"></i>{" "}
-                              {language === "ar" ? "المقاعد:" : "Seats:"}{" "}
-                              {cls.availableSeats} / {cls.capacity}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <div
+                  <BookBtn
+                    onClick={() =>
+                      handleBookNow(flight.id, flight.classes[0]?.id)
+                    }
+                    disabled={bookingLoading}
+                  >
+                    {language === "ar" ? "احجز الآن" : "Book Now"}
+                  </BookBtn>
+                </ResultCard>
+              ))
+            )}
+          </ResultsList>
+          {/* Hotel and Car booking buttons for small screens: show below results */}
+          {isSmallScreen && (
+            <div style={{ marginTop: 24 }}>
+              <HotelBookingButton
+                onClick={() => {
+                  setShowCarForm(false);
+                  setShowHotelForm((v) => !v);
+                }}
+              >
+                <i className="fas fa-hotel"></i>
+                {language === "ar" ? "احجز فندقك" : "Book Hotel"}
+              </HotelBookingButton>
+              {showHotelForm && (
+                <form
+                  style={{
+                    background: "#fff",
+                    boxShadow: "0 2px 8px #eee",
+                    borderRadius: 10,
+                    padding: 20,
+                    marginTop: 10,
+                    minWidth: 250,
+                    width: "100%",
+                    maxWidth: 350,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
+                  }}
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!hotelDestination.trim()) {
+                      setHotelFormError(
+                        language === "ar"
+                          ? "يرجى إدخال الوجهة"
+                          : "Please enter a destination"
+                      );
+                      return;
+                    }
+                    setHotelFormError("");
+                    navigate("/hotels/results", {
+                      state: { destination: hotelDestination },
+                    });
+                  }}
+                >
+                  <label
                     style={{
-                      color: "#888",
-                      fontSize: "0.9em",
-                      marginTop: "8px",
+                      fontWeight: 600,
+                      color: "#00233d",
+                      marginBottom: 4,
                     }}
                   >
-                    <strong>ID:</strong> {flight.id}
+                    {language === "ar" ? "الوجهة" : "Destination"}
+                  </label>
+                  <div style={{ position: "relative" }}>
+                    <i
+                      className="fas fa-map-marker-alt input-icon"
+                      style={{
+                        position: "absolute",
+                        left: 10,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "#888",
+                        fontSize: "1.1rem",
+                      }}
+                    ></i>
+                    <input
+                      type="text"
+                      value={hotelDestination}
+                      onChange={(e) => setHotelDestination(e.target.value)}
+                      placeholder={
+                        language === "ar"
+                          ? "أين تريد أن تذهب؟"
+                          : "Where do you want to go?"
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "0.7rem 0.7rem 0.7rem 2.2rem",
+                        border: hotelFormError
+                          ? "1px solid red"
+                          : "1px solid #ddd",
+                        borderRadius: 8,
+                        fontSize: "1rem",
+                        color: "#00233d",
+                        outline: "none",
+                      }}
+                      className={hotelFormError ? "error" : ""}
+                    />
                   </div>
-                </div>
-                <BookBtn
-                  onClick={() =>
-                    handleBookNow(flight.id, flight.classes[0]?.id)
-                  }
-                  disabled={bookingLoading}
+                  {hotelFormError && (
+                    <div style={{ color: "red", fontSize: 13, marginTop: 2 }}>
+                      {hotelFormError}
+                    </div>
+                  )}
+                  <button
+                    type="submit"
+                    style={{
+                      background: "#00233d",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: 8,
+                      padding: "0.8rem 1.5rem",
+                      fontSize: "1.1rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      marginTop: 8,
+                      width: "100%",
+                    }}
+                  >
+                    {language === "ar" ? "بحث" : "Search"}
+                  </button>
+                </form>
+              )}
+              <CarBookingButton
+                onClick={() => {
+                  setShowHotelForm(false);
+                  setShowCarForm((v) => !v);
+                }}
+              >
+                <i className="fas fa-car"></i>
+                {language === "ar" ? "احجز سيارتك" : "Book Car"}
+              </CarBookingButton>
+              {showCarForm && (
+                <form
+                  style={{
+                    background: "#fff",
+                    boxShadow: "0 2px 8px #eee",
+                    borderRadius: 10,
+                    padding: 20,
+                    marginTop: 10,
+                    minWidth: 250,
+                    width: "100%",
+                    maxWidth: 350,
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: 12,
+                  }}
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    if (!carPickupLocation.trim()) {
+                      setCarFormError(
+                        language === "ar"
+                          ? "يرجى إدخال مكان الاستلام"
+                          : "Please enter a pickup location"
+                      );
+                      return;
+                    }
+                    setCarFormError("");
+                    navigate("/available-cars", {
+                      state: { pickupLocation: carPickupLocation },
+                    });
+                  }}
                 >
-                  {language === "ar" ? "احجز الآن" : "Book Now"}
-                </BookBtn>
-              </ResultCard>
-            ))
+                  <label
+                    style={{
+                      fontWeight: 600,
+                      color: "#00233d",
+                      marginBottom: 4,
+                    }}
+                  >
+                    {language === "ar" ? "مكان الاستلام" : "Pickup Location"}
+                  </label>
+                  <div style={{ position: "relative" }}>
+                    <i
+                      className="fas fa-map-marker-alt input-icon"
+                      style={{
+                        position: "absolute",
+                        left: 10,
+                        top: "50%",
+                        transform: "translateY(-50%)",
+                        color: "#888",
+                        fontSize: "1.1rem",
+                      }}
+                    ></i>
+                    <input
+                      type="text"
+                      value={carPickupLocation}
+                      onChange={(e) => setCarPickupLocation(e.target.value)}
+                      placeholder={
+                        language === "ar"
+                          ? "أين تريد استلام السيارة؟"
+                          : "Where do you want to pick up the car?"
+                      }
+                      style={{
+                        width: "100%",
+                        padding: "0.7rem 0.7rem 0.7rem 2.2rem",
+                        border: carFormError
+                          ? "1px solid red"
+                          : "1px solid #ddd",
+                        borderRadius: 8,
+                        fontSize: "1rem",
+                        color: "#00233d",
+                        outline: "none",
+                      }}
+                      className={carFormError ? "error" : ""}
+                    />
+                  </div>
+                  {carFormError && (
+                    <div style={{ color: "red", fontSize: 13, marginTop: 2 }}>
+                      {carFormError}
+                    </div>
+                  )}
+                  <button
+                    type="submit"
+                    style={{
+                      background: "#00233d",
+                      color: "#fff",
+                      border: "none",
+                      borderRadius: 8,
+                      padding: "0.8rem 1.5rem",
+                      fontSize: "1.1rem",
+                      fontWeight: 600,
+                      cursor: "pointer",
+                      marginTop: 8,
+                      width: "100%",
+                    }}
+                  >
+                    {language === "ar" ? "بحث" : "Search"}
+                  </button>
+                </form>
+              )}
+            </div>
           )}
-        </ResultsList>
-      </div>
-    </ResultsFlex>
+        </div>
+      </ResultsFlex>
+    </>
   );
 };
 

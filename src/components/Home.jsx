@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import styled from "styled-components";
+import styled, { createGlobalStyle } from "styled-components";
 import { Link, useNavigate } from "react-router-dom";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import { FaPlane } from "react-icons/fa";
@@ -10,19 +10,17 @@ const { Range } = Slider;
 
 const WelcomeContainer = styled.div`
   max-width: 1400px;
-  margin-top: -49px;
+  margin-top: -60px;
   margin-right: 20px;
   margin-bottom: 0px;
   margin-left: 0px;
   padding: 2rem;
-
+  
   @media (max-width: 768px) {
     padding: 1rem;
+    margin: 0 10px;
   }
 
-  @media (max-width: 480px) {
-    padding: 0.5rem;
-  }
 `;
 
 const HeroSection = styled.section`
@@ -30,42 +28,31 @@ const HeroSection = styled.section`
   background-size: cover;
   background-position: center;
   color: var(--white);
-  padding: 9rem 2rem;
+  padding-top: 65px;
+  padding-right: 32px;
+  padding-bottom: 125px;
+  padding-left: 32px;
   text-align: center;
   border-radius: 15px;
   margin-bottom: 3rem;
-  // margin-top: -8rem;
-  // margin-right: -10rem;
-  // margin-left: -10rem;
   width: 80rem;
-
+  
   @media (max-width: 768px) {
-    padding: 8rem 0rem;
-    margin: -4rem -1rem 2rem -11rem;
-    width: auto;
+    width: 100%;
+    padding: 40px 16px;
     border-radius: 10px;
   }
 
-  @media (max-width: 480px) {
-    padding: 8rem 0.8rem;
-    margin: -3rem -0.5rem 1.5rem -9.5rem;
-    border-radius: 8px;
-  }
 `;
 
 const HeroTitle = styled.h1`
   font-size: 3rem;
   margin-bottom: 1rem;
-
+  
   @media (max-width: 768px) {
     font-size: 2rem;
-    margin-bottom: 0.5rem;
   }
 
-  @media (max-width: 480px) {
-    font-size: 1.8rem;
-    margin-bottom: 0.4rem;
-  }
 `;
 
 const HeroSubtitle = styled.p`
@@ -73,14 +60,8 @@ const HeroSubtitle = styled.p`
   margin-bottom: 2rem;
 
   @media (max-width: 768px) {
-    font-size: 1.1rem;
-    margin-bottom: 1.5rem;
-  }
-
-  @media (max-width: 480px) {
     font-size: 1rem;
-    margin-bottom: 1rem;
-  }
+  } 
 `;
 
 /* Service Tabs */
@@ -89,17 +70,12 @@ const ServiceTabs = styled.div`
   justify-content: center;
   gap: 1rem;
   margin-bottom: 2rem;
-
+  
   @media (max-width: 768px) {
-    flex-wrap: wrap;
-    gap: 0.5rem;
-    margin-bottom: 1.5rem;
+    flex-direction: column;
+    align-items: center;
   }
 
-  @media (max-width: 480px) {
-    gap: 0.4rem;
-    margin-bottom: 1rem;
-  }
 `;
 
 const ServiceTab = styled.button`
@@ -114,16 +90,6 @@ const ServiceTab = styled.button`
   align-items: center;
   gap: 0.5rem;
 
-  @media (max-width: 768px) {
-    padding: 0.8rem 1.2rem;
-    font-size: 0.9rem;
-  }
-
-  @media (max-width: 480px) {
-    padding: 0.6rem 1rem;
-    font-size: 0.85rem;
-    border-radius: 6px;
-  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.2);
@@ -142,35 +108,23 @@ const ServiceTab = styled.button`
 
   svg {
     font-size: 1.2rem;
-
-    @media (max-width: 768px) {
-      font-size: 1rem;
-    }
-
-    @media (max-width: 480px) {
-      font-size: 0.9rem;
-    }
+  }
+    
+  @media (max-width: 768px) {
+    width: 50%;
+    justify-content: center;
   }
 `;
 
 /* Search Box Styles */
 const SearchBox = styled.div`
-  // background: white;
-  // max-width: 800px;
-  padding: 2rem;
+  padding: 10px;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(17, 16, 16, 0.57);
   margin: 0 auto;
-
+  
   @media (max-width: 768px) {
-    padding: 1.5rem;
-    margin: 0 1rem;
-  }
-
-  @media (max-width: 480px) {
-    padding: 1rem;
-    margin: 0 0.5rem;
-    border-radius: 8px;
+    width: 100%;
   }
 `;
 
@@ -180,15 +134,11 @@ const SearchForm = styled.form`
   gap: 20px;
   align-items: end;
   padding: 10px;
-
+  
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 15px;
   }
 
-  @media (max-width: 480px) {
-    gap: 12px;
-  }
 `;
 
 const FormGroup = styled.div`
@@ -199,15 +149,6 @@ const FormGroup = styled.div`
     color: var(--primary-color);
     margin-bottom: 0.5rem;
     font-weight: 500;
-
-    @media (max-width: 768px) {
-      font-size: 0.9rem;
-    }
-
-    @media (max-width: 480px) {
-      font-size: 0.85rem;
-      margin-bottom: 0.4rem;
-    }
   }
 
   input,
@@ -217,16 +158,7 @@ const FormGroup = styled.div`
     border-radius: 8px;
     font-size: 1rem;
 
-    @media (max-width: 768px) {
-      padding: 0.6rem;
-      font-size: 0.9rem;
-    }
 
-    @media (max-width: 480px) {
-      padding: 0.5rem;
-      font-size: 0.85rem;
-      border-radius: 6px;
-    }
 
     &:focus {
       outline: none;
@@ -245,16 +177,11 @@ const OriginDestinationGroup = styled.div`
   gap: 1rem;
   align-items: flex-end;
   grid-column: 1 / span 2;
-
+  
   @media (max-width: 768px) {
     grid-template-columns: 1fr;
-    gap: 0.5rem;
-    grid-column: 1;
   }
 
-  @media (max-width: 480px) {
-    gap: 0.4rem;
-  }
 `;
 
 const SwapButton = styled.button`
@@ -276,17 +203,6 @@ const SwapButton = styled.button`
   justify-content: center;
   margin-top: auto;
 
-  @media (max-width: 768px) {
-    width: 35px;
-    height: 35px;
-    padding: 0 8px;
-  }
-
-  @media (max-width: 480px) {
-    width: 30px;
-    height: 30px;
-    padding: 0 6px;
-  }
 
   &:hover {
     background: #f5f5f5;
@@ -294,16 +210,10 @@ const SwapButton = styled.button`
 
   i {
     font-size: 1.2rem;
-
-    @media (max-width: 768px) {
-      font-size: 1rem;
-      margin-right: 22rem;
-    }
-
-    @media (max-width: 480px) {
-      font-size: 0.9rem;
-      margin-right: 12rem;
-    }
+  }
+    
+  @media (max-width: 768px) {
+    margin: 0 auto;
   }
 `;
 
@@ -316,18 +226,20 @@ const SearchButton = styled.button`
   cursor: pointer;
   font-size: 1.1rem;
   transition: all 0.3s ease;
-  margin-top: 1rem;
-  grid-column: 1 / span 2;
+  width: 120px;
+  grid-column: 2 / 3;
+  justify-self: end;
 
-  @media (max-width: 768px) {
-    font-size: 1rem;
-    padding: 0.8rem;
-    grid-column: 1;
-  }
 
   &:hover {
     background: #ff8c00;
     transform: translateY(-2px);
+  }
+    
+  @media (max-width: 768px) {
+    justify-self: center;
+    grid-column: auto;
+    width: 100%;
   }
 `;
 
@@ -336,11 +248,11 @@ const FeaturesSection = styled.section`
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
   gap: 2rem;
   padding: 3rem 0;
-
+  
   @media (max-width: 768px) {
-    gap: 1rem;
-    padding: 2rem 0;
+    padding: 2rem 1rem;
   }
+
 `;
 
 const FeatureCard = styled.div`
@@ -350,9 +262,6 @@ const FeatureCard = styled.div`
   border-radius: 10px;
   transition: transform 0.3s ease;
 
-  @media (max-width: 768px) {
-    padding: 1.5rem;
-  }
 
   &:hover {
     transform: translateY(-5px);
@@ -364,30 +273,17 @@ const FeatureCard = styled.div`
     color: var(--accent-color);
     margin-bottom: 1rem;
 
-    @media (max-width: 768px) {
-      font-size: 2rem;
-      margin-bottom: 0.8rem;
-    }
   }
 
   h3 {
     margin-bottom: 1rem;
     color: var(--primary-color);
 
-    @media (max-width: 768px) {
-      font-size: 1.1rem;
-      margin-bottom: 0.8rem;
-    }
   }
 
   p {
     color: #666;
     line-height: 1.6;
-
-    @media (max-width: 768px) {
-      font-size: 0.9rem;
-      line-height: 1.4;
-    }
   }
 `;
 
@@ -395,7 +291,7 @@ const OffersSection = styled.section`
   padding: 3rem 0;
 
   @media (max-width: 768px) {
-    padding: 2rem 0;
+    padding: 2rem 1rem;
   }
 `;
 
@@ -405,10 +301,6 @@ const OffersGrid = styled.div`
   gap: 2rem;
   margin-top: 2rem;
 
-  @media (max-width: 768px) {
-    gap: 1rem;
-    margin-top: 1.5rem;
-  }
 `;
 
 const OfferCard = styled.div`
@@ -416,6 +308,14 @@ const OfferCard = styled.div`
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1), box-shadow 0.3s cubic-bezier(0.4,0,0.2,1);
+  will-change: transform, box-shadow;
+  
+  &:hover {
+    transform: scale(1.045);
+    box-shadow: 0 8px 24px rgba(25, 118, 210, 0.13), 0 2px 10px rgba(0,0,0,0.12);
+    z-index: 2;
+  }
 `;
 
 const OfferImage = styled.div`
@@ -423,26 +323,21 @@ const OfferImage = styled.div`
   background-image: url(${(props) => props.image});
   background-size: cover;
   background-position: center;
-
+  
   @media (max-width: 768px) {
     height: 160px;
   }
+
 `;
 
 const OfferContent = styled.div`
   padding: 1.5rem;
 
-  @media (max-width: 768px) {
-    padding: 1rem;
-  }
 
   h3 {
     margin-bottom: 0.5rem;
     color: #333;
 
-    @media (max-width: 768px) {
-      font-size: 1.1rem;
-    }
   }
 
   .offer-price {
@@ -450,16 +345,20 @@ const OfferContent = styled.div`
     font-weight: bold;
     margin-bottom: 0.5rem;
 
-    @media (max-width: 768px) {
-      font-size: 0.9rem;
-    }
+    
   }
 
   p {
     color: #666;
+    
+  }
+`;
 
-    @media (max-width: 768px) {
-      font-size: 0.9rem;
+const GlobalMobileBodyStyle = createGlobalStyle`
+  @media (max-width: 768px) {
+    body {
+      padding-left: 0px !important;
+      padding-top: 0px !important;
     }
   }
 `;
@@ -600,248 +499,242 @@ const Home = () => {
   }
 
   return (
-    <WelcomeContainer>
-      <HeroSection>
-        <HeroTitle>
-          {language === "ar" ? "رحلتك تبدأ هنا" : "Your journey Start Here"}
-        </HeroTitle>
-        <HeroSubtitle>
-          {language === "ar"
-            ? "احجز رحلاتك وفنادقك وسياراتك بأفضل الأسعار"
-            : "Book your flights, hotels and cars at the best prices."}
-        </HeroSubtitle>
+    <>
+      <GlobalMobileBodyStyle />
+      <WelcomeContainer>
+        <HeroSection>
+          <HeroTitle>
+            {language === "ar" ? "رحلتك تبدأ هنا" : "Your journey Start Here"}
+          </HeroTitle>
+          <HeroSubtitle>
+            {language === "ar"
+              ? "احجز رحلاتك وفنادقك وسياراتك بأفضل الأسعار"
+              : "Book your flights, hotels and cars at the best prices."}
+          </HeroSubtitle>
 
-        <ServiceTabs>
-          <ServiceTab
-            className={activeService === "flights" ? "active" : ""}
-            onClick={() => setActiveService("flights")}
-          >
-            <FaPlane />
-            {language === "ar" ? "رحلات طيران" : "Flights"}
-          </ServiceTab>
-        </ServiceTabs>
+          <ServiceTabs>
+            <ServiceTab
+              className={activeService === "flights" ? "active" : ""}
+              onClick={() => setActiveService("flights")}
+            >
+              <FaPlane />
+              {language === "ar" ? "رحلات طيران" : "Flights"}
+            </ServiceTab>
+          </ServiceTabs>
 
-        <SearchBox>
-          <SearchForm onSubmit={handleSubmit}>
-            <OriginDestinationGroup>
+          <SearchBox>
+            <SearchForm onSubmit={handleSubmit}>
+              <OriginDestinationGroup>
+                <FormGroup>
+                  <input
+                    type="text"
+                    id="origin"
+                    list="departure-options"
+                    value={origin}
+                    onChange={(e) => setOrigin(e.target.value)}
+                    className={errors.origin ? "error" : ""}
+                    placeholder={
+                      language === "ar" ? "مدينة المغادرة" : "Departure city"
+                    }
+                  />
+                  <datalist id="departure-options">
+                    {departureOptions.map(
+                      (opt) =>
+                        opt.value && (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        )
+                    )}
+                  </datalist>
+                </FormGroup>
+                <SwapButton type="button" onClick={handleSwap}>
+                  <i className="fas fa-exchange-alt"></i>
+                </SwapButton>
+                <FormGroup>
+                  <input
+                    type="text"
+                    id="destination"
+                    list="arrival-options"
+                    value={destination}
+                    onChange={(e) => setDestination(e.target.value)}
+                    className={errors.destination ? "error" : ""}
+                    placeholder={
+                      language === "ar" ? "مدينة الوصول" : "Arrival city"
+                    }
+                  />
+                  <datalist id="arrival-options">
+                    {arrivalOptions.map(
+                      (opt) =>
+                        opt.value && (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        )
+                    )}
+                  </datalist>
+                </FormGroup>
+              </OriginDestinationGroup>
+
               <FormGroup>
-                <label htmlFor="origin">
-                  {language === "ar" ? "من" : "From"}
+                <label htmlFor="departure-date">
+                  {language === "ar" ? "تاريخ المغادرة" : "Departure Date"}
                 </label>
                 <input
-                  type="text"
-                  id="origin"
-                  list="departure-options"
-                  value={origin}
-                  onChange={(e) => setOrigin(e.target.value)}
-                  className={errors.origin ? "error" : ""}
-                  placeholder={
-                    language === "ar" ? "مدينة المغادرة" : "Departure city"
-                  }
+                  type="date"
+                  id="departure-date"
+                  value={departureDate}
+                  min={new Date().toISOString().split("T")[0]}
+                  onChange={(e) => setDepartureDate(e.target.value)}
+                  className={errors.departureDate ? "error" : ""}
                 />
-                <datalist id="departure-options">
-                  {departureOptions.map(
-                    (opt) =>
-                      opt.value && (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      )
-                  )}
-                </datalist>
               </FormGroup>
-              <SwapButton type="button" onClick={handleSwap}>
-                <i className="fas fa-exchange-alt"></i>
-              </SwapButton>
               <FormGroup>
-                <label htmlFor="destination">
-                  {language === "ar" ? "إلى" : "To"}
-                </label>
-                <input
-                  type="text"
-                  id="destination"
-                  list="arrival-options"
-                  value={destination}
-                  onChange={(e) => setDestination(e.target.value)}
-                  className={errors.destination ? "error" : ""}
-                  placeholder={
-                    language === "ar" ? "مدينة الوصول" : "Arrival city"
-                  }
-                />
-                <datalist id="arrival-options">
-                  {arrivalOptions.map(
-                    (opt) =>
-                      opt.value && (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      )
-                  )}
-                </datalist>
+                <select
+                  id="cabin-class"
+                  value={cabinClass}
+                  onChange={(e) => setCabinClass(e.target.value)}
+                >
+                  {classOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
               </FormGroup>
-            </OriginDestinationGroup>
+              <SearchButton type="submit" disabled={searchLoading}>
+                {searchLoading
+                  ? language === "ar"
+                    ? "جاري البحث..."
+                    : "Searching..."
+                  : language === "ar"
+                  ? "ابحث"
+                  : "Search"}
+              </SearchButton>
+            </SearchForm>
+          </SearchBox>
+        </HeroSection>
 
-            <FormGroup>
-              <label htmlFor="departure-date">
-                {language === "ar" ? "تاريخ المغادرة" : "Departure Date"}
-              </label>
-              <input
-                type="date"
-                id="departure-date"
-                value={departureDate}
-                min={new Date().toISOString().split("T")[0]}
-                onChange={(e) => setDepartureDate(e.target.value)}
-                className={errors.departureDate ? "error" : ""}
-              />
-            </FormGroup>
-            <FormGroup>
-              <label htmlFor="cabin-class">
-                {language === "ar" ? "درجة المقعد" : "Cabin Class"}
-              </label>
-              <select
-                id="cabin-class"
-                value={cabinClass}
-                onChange={(e) => setCabinClass(e.target.value)}
-              >
-                {classOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </FormGroup>
-            <SearchButton type="submit" disabled={searchLoading}>
-              {searchLoading
-                ? language === "ar"
-                  ? "جاري البحث..."
-                  : "Searching..."
-                : language === "ar"
-                ? "ابحث"
-                : "Search"}
-            </SearchButton>
-          </SearchForm>
-        </SearchBox>
-      </HeroSection>
+        {searchError && (
+          <div style={{ color: "red", marginTop: 8 }}>{searchError}</div>
+        )}
 
-      {searchError && (
-        <div style={{ color: "red", marginTop: 8 }}>{searchError}</div>
-      )}
+        <FeaturesSection>
+          <FeatureCard>
+            <i className="fas fa-globe"></i>
+            <h3>{language === "ar" ? "وجهات متعددة" : "Multiple parties"}</h3>
+            <p>
+              {language === "ar"
+                ? "اكتشف أكثر من 1000 وجهة حول العالم"
+                : "Discover over 1,000 destinations around the world"}
+            </p>
+          </FeatureCard>
 
-      <FeaturesSection>
-        <FeatureCard>
-          <i className="fas fa-globe"></i>
-          <h3>{language === "ar" ? "وجهات متعددة" : "Multiple parties"}</h3>
-          <p>
-            {language === "ar"
-              ? "اكتشف أكثر من 1000 وجهة حول العالم"
-              : "Discover over 1,000 destinations around the world"}
-          </p>
-        </FeatureCard>
+          <FeatureCard>
+            <i className="fas fa-tag"></i>
+            <h3>{language === "ar" ? "أفضل الأسعار" : "Best Prices"}</h3>
+            <p>
+              {language === "ar"
+                ? "نضمن لك أفضل الأسعار مع خيارات متعددة"
+                : "We guarantee the best prices with Multipl options"}
+            </p>
+          </FeatureCard>
+          <FeatureCard>
+            <i className="fas fa-headset"></i>
+            <h3>{language === "ar" ? "دعم 24/7" : "24/7 support"}</h3>
+            <p>
+              {language === "ar"
+                ? " فريق دعم متكامل لمساعدتك في أي وقت"
+                : "A full support team to help you at any time"}
+            </p>
+          </FeatureCard>
+          <FeatureCard>
+            <i className="fas fa-lock"></i>
+            <h3>{language === "ar" ? "دفع آمن" : "Secure payment"}</h3>
+            <p>
+              {language === "ar"
+                ? "نضمن لك أمان معاملاتك وحماية بياناتك"
+                : "We guarantee the security of your transactions and the protection of your data."}
+            </p>
+          </FeatureCard>
+        </FeaturesSection>
 
-        <FeatureCard>
-          <i className="fas fa-tag"></i>
-          <h3>{language === "ar" ? "أفضل الأسعار" : "Best Prices"}</h3>
-          <p>
-            {language === "ar"
-              ? "نضمن لك أفضل الأسعار مع خيارات متعددة"
-              : "We guarantee the best prices with Multipl options"}
-          </p>
-        </FeatureCard>
-        <FeatureCard>
-          <i className="fas fa-headset"></i>
-          <h3>{language === "ar" ? "دعم 24/7" : "24/7 support"}</h3>
-          <p>
-            {language === "ar"
-              ? " فريق دعم متكامل لمساعدتك في أي وقت"
-              : "A full support team to help you at any time"}
-          </p>
-        </FeatureCard>
-        <FeatureCard>
-          <i className="fas fa-lock"></i>
-          <h3>{language === "ar" ? "دفع آمن" : "Secure payment"}</h3>
-          <p>
-            {language === "ar"
-              ? "نضمن لك أمان معاملاتك وحماية بياناتك"
-              : "We guarantee the security of your transactions and the protection of your data."}
-          </p>
-        </FeatureCard>
-      </FeaturesSection>
+        <OffersSection>
+          <h2>{language === "ar" ? "أفضل العروض" : "Best offers"}</h2>
+          <OffersGrid>
+            <OfferCard>
+              <OfferImage image="/src/images/dubai.jpg" />
+              <OfferContent>
+                <h3>
+                  {language === "ar" ? "عرض دبي المميز" : "Dubai Special Offer"}
+                </h3>
+                <p className="offer-price">
+                  {language === "ar"
+                    ? "يبدأ من 1999 ريال"
+                    : "Starting from 1999 SAR"}
+                </p>
+                <p>
+                  {language === "ar"
+                    ? "3 ليالي في فندق 5 نجوم مع تذاكر الطيران"
+                    : "3 nights in a 5-star hotel with flight tickets"}
+                </p>
+              </OfferContent>
+            </OfferCard>
 
-      <OffersSection>
-        <h2>{language === "ar" ? "أفضل العروض" : "Best offers"}</h2>
-        <OffersGrid>
-          <OfferCard>
-            <OfferImage image="/src/images/dubai.jpg" />
-            <OfferContent>
-              <h3>
-                {language === "ar" ? "عرض دبي المميز" : "Dubai Special Offer"}
-              </h3>
-              <p className="offer-price">
-                {language === "ar"
-                  ? "يبدأ من 1999 ريال"
-                  : "Starting from 1999 SAR"}
-              </p>
-              <p>
-                {language === "ar"
-                  ? "3 ليالي في فندق 5 نجوم مع تذاكر الطيران"
-                  : "3 nights in a 5-star hotel with flight tickets"}
-              </p>
-            </OfferContent>
-          </OfferCard>
+            <OfferCard>
+              <OfferImage image="/src/images/istanbul.jpg" />
+              <OfferContent>
+                <h3>{language === "ar" ? "رحلة إسطنبول" : "Istanbul trip"}</h3>
+                <p className="offer-price">
+                  {language === "ar"
+                    ? "يبدأ من 2499 ريال"
+                    : "Starting from 2499 SAR"}
+                </p>
+                <p>
+                  {language === "ar"
+                    ? "5 ليالي شاملة الفندق والطيران"
+                    : "5 nights including hotel and flight"}
+                </p>
+              </OfferContent>
+            </OfferCard>
 
-          <OfferCard>
-            <OfferImage image="/src/images/istanbul.jpg" />
-            <OfferContent>
-              <h3>{language === "ar" ? "رحلة إسطنبول" : "Istanbul trip"}</h3>
-              <p className="offer-price">
-                {language === "ar"
-                  ? "يبدأ من 2499 ريال"
-                  : "Starting from 2499 SAR"}
-              </p>
-              <p>
-                {language === "ar"
-                  ? "5 ليالي شاملة الفندق والطيران"
-                  : "5 nights including hotel and flight"}
-              </p>
-            </OfferContent>
-          </OfferCard>
+            <OfferCard>
+              <OfferImage image="/src/images/maldives.jpg" />
+              <OfferContent>
+                <h3>{language === "ar" ? "جزر المالديف" : "Maldives"}</h3>
+                <p className="offer-price">
+                  {language === "ar"
+                    ? "يبدأ من 4999 ريال"
+                    : "Starting from 4999 riyals"}
+                </p>
+                <p>
+                  {language === "ar"
+                    ? "7 ليالي في منتجع فاخر مع الطيران"
+                    : "7 nights in a luxury resort with flights"}
+                </p>
+              </OfferContent>
+            </OfferCard>
 
-          <OfferCard>
-            <OfferImage image="/src/images/maldives.jpg" />
-            <OfferContent>
-              <h3>{language === "ar" ? "جزر المالديف" : "Maldives"}</h3>
-              <p className="offer-price">
-                {language === "ar"
-                  ? "يبدأ من 4999 ريال"
-                  : "Starting from 4999 riyals"}
-              </p>
-              <p>
-                {language === "ar"
-                  ? "7 ليالي في منتجع فاخر مع الطيران"
-                  : "7 nights in a luxury resort with flights"}
-              </p>
-            </OfferContent>
-          </OfferCard>
-
-          <OfferCard>
-            <OfferImage image="/src/images/paris.jpg" />
-            <OfferContent>
-              <h3>{language === "ar" ? "باريس _ فرنسا" : "Paris, France"}</h3>
-              <p className="offer-price">
-                {language === "ar"
-                  ? "يبدأ من 3999 ريال"
-                  : "Starting from 3999 riyals"}
-              </p>
-              <p>
-                {language === "ar"
-                  ? "4 ليالي في فندق 5 نجوم مع تذاكر الطيران"
-                  : "4 nights in a 5-star hotel with flight tickets"}
-              </p>
-            </OfferContent>
-          </OfferCard>
-        </OffersGrid>
-      </OffersSection>
-    </WelcomeContainer>
+            <OfferCard>
+              <OfferImage image="/src/images/paris.jpg" />
+              <OfferContent>
+                <h3>{language === "ar" ? "باريس _ فرنسا" : "Paris, France"}</h3>
+                <p className="offer-price">
+                  {language === "ar"
+                    ? "يبدأ من 3999 ريال"
+                    : "Starting from 3999 riyals"}
+                </p>
+                <p>
+                  {language === "ar"
+                    ? "4 ليالي في فندق 5 نجوم مع تذاكر الطيران"
+                    : "4 nights in a 5-star hotel with flight tickets"}
+                </p>
+              </OfferContent>
+            </OfferCard>
+          </OffersGrid>
+        </OffersSection>
+      </WelcomeContainer>
+    </>
   );
 };
 

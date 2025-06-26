@@ -1,14 +1,29 @@
 import React from 'react';
-import styled from 'styled-components';
+import styled, { createGlobalStyle } from 'styled-components';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import { FaPhoneAlt } from "react-icons/fa";
 import { FaEnvelope } from "react-icons/fa";
 import { useLanguage } from '../context/LanguageContext';
+import { Link } from 'react-router-dom';
+
+const HelpGlobalStyle = createGlobalStyle`
+  @media (max-width: 900px) {
+    body {
+      padding-top: 0 !important;
+      padding-left: 0 !important;
+    }
+    .main-content {
+      padding-top: 0 !important;
+      padding-left: 0 !important;
+      padding-right: 0 !important;
+    }
+  }
+`;
 
 /* Help Page Styles */
 const HelpContainer = styled.div`
     max-width: 1200px;
-    margin: -110px auto;
+    margin: -0px auto;
     padding: 2rem;
 
     h1 {
@@ -130,54 +145,57 @@ const Help = () => {
   const { language } = useLanguage();
 
   return (
-    <HelpContainer>
+    <>
+      <HelpGlobalStyle />
+      <HelpContainer>
         <h1>{language === 'ar' ? 'كيف يمكننا مساعدتك؟' : 'How can we help you?'}</h1>
 
-      <FaqItem>
-        <h3>كيف يمكنني حجز رحلة طيران؟</h3>
-        <p>يمكنك حجز رحلة طيران بسهولة من خلال اتباع الخطوات التالية:</p>
-        <ul>
-          <li>اختر وجهة سفرك وتاريخ الرحلة</li>
-          <li>حدد عدد المسافرين</li>
-          <li>اختر الرحلة المناسبة من النتائج</li>
-          <li>أدخل بيانات المسافرين</li>
-          <li>اختر طريقة الدفع المناسبة</li>
-        </ul>
-      </FaqItem>
-
-      <FaqItem>
-       <h3>كيف يمكنني إلغاء حجز؟</h3>
-       <p>يمكنك إلغاء حجزك من خلال:</p>
-       <p>يرجى مراجعة <a href="cancellation.html">سياسة الإلغاء</a> للاطلاع على الشروط والأحكام.</p>
-      </FaqItem>
-
-
-      <FaqItem>
-       <h3>كيف يمكنني تعديل حجز؟</h3>
-       <p>يمكنك تعديل حجزك من خلال:</p>
-       <p>يمكنك تعديل تفاصيل حجزك مثل التاريخ أو الوجهة أو عدد المسافرين من خلال حسابك الشخصي. يرجى مراعاة أن بعض التعديلات قد تكون خاضعة لرسوم إضافية حسب سياسة التعديل الخاصة بالخدمة المقدمة.</p>
+        <FaqItem>
+          <h3>كيف يمكنني حجز رحلة طيران؟</h3>
+          <p>يمكنك حجز رحلة طيران بسهولة من خلال اتباع الخطوات التالية:</p>
+          <ul>
+            <li>اختر وجهة سفرك وتاريخ الرحلة</li>
+            <li>حدد عدد المسافرين</li>
+            <li>اختر الرحلة المناسبة من النتائج</li>
+            <li>أدخل بيانات المسافرين</li>
+            <li>اختر طريقة الدفع المناسبة</li>
+          </ul>
         </FaqItem>
 
-        <HelpSection>
-            <h2>طرق التواصل معنا</h2>
-            <ContactMethods>
-                <ContactItem>
-                    <FaPhoneAlt />
-                    <h3>اتصل بنا</h3>
-                    <p>123456789</p>
-                    <p>متاح على مدار الساعة</p>
-                </ContactItem>
+        <FaqItem>
+         <h3>كيف يمكنني إلغاء حجز؟</h3>
+         <p>يمكنك إلغاء حجزك من خلال:</p>
+         <p>يرجى مراجعة <Link to="/cancellation">سياسة الإلغاء</Link> للاطلاع على الشروط والأحكام.</p>
+        </FaqItem>
 
-                <ContactItem>
-                    <FaPhoneAlt />
-                    <FaEnvelope />
-                    <h3>راسلنا عبر البريد الإلكتروني</h3>
-                    <p><a href="mailto:bessie.ferry32@ethereal.email">bessie.ferry32@ethereal.email</a></p>
-                    <p>الرد خلال 24 ساعة</p>s 
-                </ContactItem>
-            </ContactMethods>        
-        </HelpSection>
-    </HelpContainer>
+
+        <FaqItem>
+         <h3>كيف يمكنني تعديل حجز؟</h3>
+         <p>يمكنك تعديل حجزك من خلال:</p>
+         <p>يمكنك تعديل تفاصيل حجزك مثل التاريخ أو الوجهة أو عدد المسافرين من خلال حسابك الشخصي. يرجى مراعاة أن بعض التعديلات قد تكون خاضعة لرسوم إضافية حسب سياسة التعديل الخاصة بالخدمة المقدمة.</p>
+          </FaqItem>
+
+          <HelpSection>
+              <h2>طرق التواصل معنا</h2>
+              <ContactMethods>
+                  <ContactItem>
+                      <FaPhoneAlt />
+                      <h3>اتصل بنا</h3>
+                      <p>123456789</p>
+                      <p>متاح على مدار الساعة</p>
+                  </ContactItem>
+
+                  <ContactItem>
+                      
+                      <FaEnvelope />
+                      <h3>راسلنا عبر البريد الإلكتروني</h3>
+                      <p><a href="mailto:bessie.ferry32@ethereal.email">bessie.ferry32@ethereal.email</a></p>
+                      <p>الرد خلال 24 ساعة</p>
+                  </ContactItem>
+              </ContactMethods>        
+          </HelpSection>
+      </HelpContainer>
+    </>
   );
 };
 

@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-route
 import { LanguageProvider } from './context/LanguageContext';
 import Navbar from './components/Navbar';
 import Home from './components/Home';
-import Hotels from './components/Hotels';
 import Login from './components/Login';
 import Signup from './components/Signup';
 import Footer from './components/Footer';
@@ -14,11 +13,13 @@ import ScrollToTop from './components/ScrollToTop';
 import About from './components/About';
 import Cancellation from './components/Cancellation';
 import Terms from './components/Terms';
-import Cars from './components/cars';
 import Flights from './components/Flights';
 import Help from './components/Help';
 import Profile from './components/Profile';
 import FlightResults from './components/FlightResults';
+import HotelResults from './components/HotelResults';
+import { BookingProvider } from './context/BookingContext';
+import AvailableCars from './components/AvailableCars';
 
 
 
@@ -37,12 +38,14 @@ function AppContent() {
           {location.pathname === '/profile' ? (
             <Profile />
           ) : (
-            <main className="main-content">
+            <main 
+              className={`main-content ${location.pathname.includes('/hotels') ? 'hotels-page' : ''}`}
+              data-route={location.pathname === '/hotels/results' ? '/hotels/results' : undefined}
+            >
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/flights" element={<Flights />} />
-                <Route path="/hotels" element={<Hotels />} />
-                <Route path="/cars" element={<Cars />} />
+                <Route path="/available-cars" element={<AvailableCars />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/about" element={<About />} />
@@ -50,6 +53,7 @@ function AppContent() {
                 <Route path="/terms" element={<Terms />} />
                 <Route path="/help" element={<Help />} />
                 <Route path="/flights/results" element={<FlightResults />} />
+                <Route path="/hotels/results" element={<HotelResults />} />
               </Routes>
             </main>
           )}
@@ -63,7 +67,9 @@ function AppContent() {
 function App() {
   return (
     <Router>
-      <AppContent />
+      <BookingProvider>
+        <AppContent />
+      </BookingProvider>
     </Router>
   );
 }
