@@ -813,7 +813,7 @@ const Profile = () => {
   const tabList = [
     { key: "user", label: "Account" },
     { key: "settings", label: "Settings" },
-    { key: "trips", label: "Trips" },
+    { key: "trips", label: "Reservations" },
   ];
 
   return (
